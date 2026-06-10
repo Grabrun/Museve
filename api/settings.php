@@ -1,6 +1,6 @@
 <?php
 // 设置 API (公开)
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/connect.php';
 
 $pdo = getDB();
 $method = getMethod();

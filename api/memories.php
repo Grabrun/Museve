@@ -1,6 +1,6 @@
 <?php
 // 回忆 API
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/connect.php';
 
 $pdo = getDB();
 $method = getMethod();

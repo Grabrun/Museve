@@ -15,7 +15,7 @@ if (preg_match('/\/(\d+)\/?$/', $path, $m)) {
 switch ($method) {
     case 'GET':
         if ($id) {
-            $stmt = $pdo->prepare("SELECT w.*, u.nickname, u.avatar FROM whispers w LEFT JOIN users u ON w.user_id = u.id WHERE w.id = :id");
+            $stmt = $pdo->prepare("SELECT w.*, u.username, u.avatar FROM whispers w LEFT JOIN users u ON w.author_id = u.id WHERE w.id = :id");
             $stmt->execute([':id' => $id]);
             $item = $stmt->fetch();
             if (!$item) {
@@ -29,7 +29,7 @@ switch ($method) {
         $countStmt = $pdo->query("SELECT COUNT(*) FROM whispers");
         $total = (int)$countStmt->fetchColumn();
 
-        $stmt = $pdo->prepare("SELECT w.*, u.nickname, u.avatar FROM whispers w LEFT JOIN users u ON w.user_id = u.id ORDER BY w.created_at DESC LIMIT :per OFFSET :offset");
+        $stmt = $pdo->prepare("SELECT w.*, u.username, u.avatar FROM whispers w LEFT JOIN users u ON w.author_id = u.id ORDER BY w.created_at DESC LIMIT :per OFFSET :offset");
         $stmt->bindValue(':per', $per, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -45,10 +45,10 @@ switch ($method) {
             jsonResponse(400, '内容不能为空');
         }
 
-        $stmt = $pdo->prepare("INSERT INTO whispers (content, user_id, created_at) VALUES (:content, :user_id, NOW())");
+        $stmt = $pdo->prepare("INSERT INTO whispers (content, user_id, created_at) VALUES (:content, :author_id, NOW())");
         $stmt->execute([
             ':content' => $content,
-            ':user_id' => $user['id'],
+            ':author_id' => $user['id'],
         ]);
 
         jsonSuccess(['id' => (int)$pdo->lastInsertId()]);

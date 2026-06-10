@@ -1,6 +1,6 @@
 <?php
 // 回忆时光轴 Section
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/connect.php';
 
 $pdo = getDB();
 [$page, $per, $offset] = getPagination();

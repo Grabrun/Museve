@@ -1,6 +1,6 @@
 <?php
 // 文章详情 Section
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/connect.php';
 
 $pdo = getDB();
 $id = getRouteId();
@@ -11,7 +11,7 @@ if (!$id) {
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT a.*, u.nickname AS author_name FROM articles a LEFT JOIN users u ON a.user_id = u.id WHERE a.id = :id AND a.status = 'published'");
+$stmt = $pdo->prepare("SELECT a.*, u.username AS author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.id = :id AND a.status = 'published'");
 $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 $stmt->execute();
 $article = $stmt->fetch();

@@ -1,6 +1,6 @@
 <?php
 // 悄悄话气泡流 Section
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/connect.php';
 
 $pdo = getDB();
 [$page, $per, $offset] = getPagination();
@@ -8,7 +8,7 @@ $pdo = getDB();
 $countStmt = $pdo->query("SELECT COUNT(*) FROM whispers");
 $total = (int)$countStmt->fetchColumn();
 
-$stmt = $pdo->prepare("SELECT w.*, u.nickname, u.avatar FROM whispers w LEFT JOIN users u ON w.user_id = u.id ORDER BY w.created_at DESC LIMIT :per OFFSET :offset");
+$stmt = $pdo->prepare("SELECT w.*, u.username, u.avatar FROM whispers w LEFT JOIN users u ON w.author_id = u.id ORDER BY w.created_at DESC LIMIT :per OFFSET :offset");
 $stmt->bindValue(':per', $per, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
@@ -49,7 +49,7 @@ $bubbleColors = [
                 <!-- 气泡 -->
                 <div class="flex-1">
                     <div class="inline-block max-w-full rounded-2xl rounded-tl-sm px-5 py-3.5 border <?= $colorClass ?> shadow-sm">
-                        <p class="text-sm font-semibold text-[#3E3640] mb-1"><?= htmlspecialchars($whisper['nickname'] ?? '匿名') ?></p>
+                        <p class="text-sm font-semibold text-[#3E3640] mb-1"><?= htmlspecialchars($whisper['username'] ?? '匿名') ?></p>
                         <p class="font-serif text-[#3E3640] leading-relaxed"><?= nl2br(htmlspecialchars($whisper['content'] ?? '')) ?></p>
                     </div>
                     <time class="block text-xs text-[#8E827F] mt-1.5 ml-1"><?= htmlspecialchars($whisper['created_at'] ?? '') ?></time>
@@ -103,7 +103,7 @@ async function loadMoreWhispers() {
                     <img src="${avatar}" alt="头像" class="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-1 ring-2 ring-white shadow-sm" onerror="this.src='/resources/images/default-avatar.svg'">
                     <div class="flex-1">
                         <div class="inline-block max-w-full rounded-2xl rounded-tl-sm px-5 py-3.5 border ${colorClass} shadow-sm">
-                            <p class="text-sm font-semibold text-[#3E3640] mb-1">${w.nickname || '匿名'}</p>
+                            <p class="text-sm font-semibold text-[#3E3640] mb-1">${w.username || '匿名'}</p>
                             <p class="font-serif text-[#3E3640] leading-relaxed">${(w.content || '').replace(/\n/g, '<br>')}</p>
                         </div>
                         <time class="block text-xs text-[#8E827F] mt-1.5 ml-1">${w.created_at || ''}</time>

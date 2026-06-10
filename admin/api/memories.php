@@ -39,7 +39,7 @@ switch ($method) {
         $countStmt->execute($params);
         $total = (int)$countStmt->fetchColumn();
 
-        $stmt = $pdo->prepare("SELECT m.*, u.nickname AS creator_name FROM memories m LEFT JOIN users u ON m.user_id = u.id {$where} ORDER BY m.event_time DESC LIMIT :per OFFSET :offset");
+        $stmt = $pdo->prepare("SELECT m.*, u.username AS creator_name FROM memories m LEFT JOIN users u ON m.author_id = u.id {$where} ORDER BY m.event_time DESC LIMIT :per OFFSET :offset");
         foreach ($params as $k => $v) $stmt->bindValue($k, $v);
         $stmt->bindValue(':per', $per, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -56,13 +56,13 @@ switch ($method) {
             jsonResponse(400, '标题不能为空');
         }
 
-        $stmt = $pdo->prepare("INSERT INTO memories (title, image, content, event_time, user_id, created_at) VALUES (:title, :image, :content, :event_time, :user_id, NOW())");
+        $stmt = $pdo->prepare("INSERT INTO memories (title, image, content, event_time, user_id, created_at) VALUES (:title, :image, :content, :event_time, :author_id, NOW())");
         $stmt->execute([
             ':title' => $title,
             ':image' => $body['image'] ?? '',
             ':content' => $body['content'] ?? '',
             ':event_time' => $body['event_time'] ?? null,
-            ':user_id' => $user['id'],
+            ':author_id' => $user['id'],
         ]);
 
         jsonSuccess(['id' => (int)$pdo->lastInsertId()]);

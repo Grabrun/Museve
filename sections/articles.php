@@ -1,6 +1,6 @@
 <?php
 // 文章列表 Section
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/connect.php';
 
 $pdo = getDB();
 [$page, $per, $offset] = getPagination();
@@ -8,7 +8,7 @@ $pdo = getDB();
 $countStmt = $pdo->query("SELECT COUNT(*) FROM articles WHERE status = 'published'");
 $total = (int)$countStmt->fetchColumn();
 
-$stmt = $pdo->prepare("SELECT a.*, u.nickname AS author_name FROM articles a LEFT JOIN users u ON a.user_id = u.id WHERE a.status = 'published' ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
+$stmt = $pdo->prepare("SELECT a.*, u.username AS author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.status = 'published' ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
 $stmt->bindValue(':per', $per, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();

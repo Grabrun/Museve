@@ -15,11 +15,11 @@ if (preg_match('/\/(\d+)\/?$/', $path, $m)) {
 switch ($method) {
     case 'GET':
         if ($id) {
-            $stmt = $pdo->prepare("SELECT a.*, u.nickname AS author_name FROM articles a LEFT JOIN users u ON a.user_id = u.id WHERE a.id = :id");
+            $stmt = $pdo->prepare("SELECT a.*, u.username AS author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.id = :id");
             $stmt->execute([':id' => $id]);
             $item = $stmt->fetch();
             if (!$item) {
-                jsonResponse(ERR_ARTICLE_NOT_FOUND, '文章不存在');
+                jsonResponse(3001, '文章不存在');
             }
             jsonSuccess($item);
         }
@@ -44,7 +44,7 @@ switch ($method) {
         $countStmt->execute($params);
         $total = (int)$countStmt->fetchColumn();
 
-        $stmt = $pdo->prepare("SELECT a.id, a.title, a.cover, a.status, a.created_at, a.updated_at, u.nickname AS author_name FROM articles a LEFT JOIN users u ON a.user_id = u.id {$whereClause} ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
+        $stmt = $pdo->prepare("SELECT a.id, a.title, a.cover, a.status, a.created_at, a.updated_at, u.username AS author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id {$whereClause} ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
         foreach ($params as $k => $v) $stmt->bindValue($k, $v);
         $stmt->bindValue(':per', $per, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -66,13 +66,13 @@ switch ($method) {
         $allowedTags = '<p><br><h1><h2><h3><h4><h5><h6><strong><em><u><s><a><img><blockquote><ul><ol><li><pre><code><hr><div><span><table><thead><tbody><tr><th><td><figure><figcaption><iframe>';
         $content = strip_tags($content, $allowedTags);
 
-        $stmt = $pdo->prepare("INSERT INTO articles (title, content, cover, status, user_id, created_at, updated_at) VALUES (:title, :content, :cover, :status, :user_id, NOW(), NOW())");
+        $stmt = $pdo->prepare("INSERT INTO articles (title, content, cover, status, author_id, created_at, updated_at) VALUES (:title, :content, :cover, :status, :author_id, NOW(), NOW())");
         $stmt->execute([
             ':title' => $title,
             ':content' => $content,
             ':cover' => $body['cover'] ?? '',
             ':status' => $body['status'] ?? 'draft',
-            ':user_id' => $user['id'],
+            ':author_id' => $user['id'],
         ]);
 
         jsonSuccess(['id' => (int)$pdo->lastInsertId()]);

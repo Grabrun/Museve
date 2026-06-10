@@ -67,6 +67,7 @@ function autoCreateTables(PDO $db): void {
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `title` VARCHAR(255) NOT NULL DEFAULT '',
             `content` LONGTEXT NOT NULL,
+            `cover` VARCHAR(500) NOT NULL DEFAULT '',
             `status` ENUM('draft','published','pending','archived','deleted') DEFAULT 'draft',
             `author_id` INT UNSIGNED NOT NULL DEFAULT 0,
             `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -151,3 +152,35 @@ function jsonResponse(int $code, string $message, $data = null): void {
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
+
+// 获取请求方法
+function getMethod(): string {
+    return $_SERVER['REQUEST_METHOD'];
+}
+
+// 获取 JSON 请求体
+function getJsonBody(): array {
+    return json_decode(file_get_contents('php://input'), true) ?? [];
+}
+
+// 获取分页参数
+function getPagination(int $defaultPer = 10): array {
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $per = min(50, max(1, intval($_GET['per'] ?? $defaultPer)));
+    $offset = ($page - 1) * $per;
+    return [$page, $per, $offset];
+}
+
+// 获取路由 ID 参数
+function getRouteId(): int {
+    return intval($_GET['id'] ?? 0);
+}
+
+// 统一错误码常量
+const ERR_INVALID_CREDENTIALS = 2000;
+const ERR_ACCOUNT_LOCKED = 2001;
+const ERR_CAPTCHA_ERROR = 2002;
+const ERR_ARTICLE_NOT_FOUND = 3001;
+const ERR_NO_PERMISSION = 3002;
+const ERR_UPLOAD_FAILED = 4001;
+const ERR_FILE_TYPE_NOT_ALLOWED = 4002;
