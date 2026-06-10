@@ -19,4 +19,10 @@ Thumbs.db
 
 # Logs
 *.log
+
+# 备份
+backups/
+
+# 环境
+.env
 .openclaw/

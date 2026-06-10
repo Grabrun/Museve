@@ -34,6 +34,19 @@ if (!$matched && preg_match('#^/read/(\d+)$#', $path, $m)) {
     $matched = true;
 }
 
+// /sitemap.xml
+if ($path === '/sitemap.xml') {
+    require __DIR__ . '/sitemap.php';
+    exit;
+}
+
+// /robots.txt
+if ($path === '/robots.txt') {
+    header('Content-Type: text/plain');
+    readfile(__DIR__ . '/robots.txt');
+    exit;
+}
+
 // /api/*
 if (!$matched && preg_match('#^/api/(.+)$#', $path, $m)) {
     $apiFile = __DIR__ . '/api/' . basename($m[1]) . '.php';
