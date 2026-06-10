@@ -27,6 +27,13 @@ if (isset($routes[$path])) {
     $matched = true;
 }
 
+// /memory/{id}
+if (!$matched && preg_match('#^/memory/(\d+)$#', $path, $m)) {
+    $_GET['id'] = $m[1];
+    $content = __DIR__ . '/sections/memory.php';
+    $matched = true;
+}
+
 // /read/{id}
 if (!$matched && preg_match('#^/read/(\d+)$#', $path, $m)) {
     $_GET['id'] = $m[1];
