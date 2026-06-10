@@ -4,11 +4,21 @@ require_once __DIR__ . '/../includes/connect.php';
 
 $pdo = getDB();
 [$page, $per, $offset] = getPagination();
+$search = trim($_GET['search'] ?? '');
 
-$countStmt = $pdo->query("SELECT COUNT(*) FROM articles WHERE status = 'published'");
+$where = "WHERE a.status = 'published'";
+$params = [];
+if ($search) {
+    $where .= " AND a.title LIKE :search";
+    $params[':search'] = "%$search%";
+}
+
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM articles a $where");
+$countStmt->execute($params);
 $total = (int)$countStmt->fetchColumn();
 
-$stmt = $pdo->prepare("SELECT a.*, u.username AS author_name, u.avatar AS author_avatar FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.status = 'published' ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
+$stmt = $pdo->prepare("SELECT a.*, u.username AS author_name, u.avatar AS author_avatar FROM articles a LEFT JOIN users u ON a.author_id = u.id $where ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
+foreach ($params as $k => $v) $stmt->bindValue($k, $v);
 $stmt->bindValue(':per', $per, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
@@ -246,7 +256,29 @@ $totalPages = $total > $per ? (int)ceil($total / $per) : 0;
 </style>
 
 <section class="articles-section pjax-fade-in">
-    <h2 class="articles-section__title">文章</h2>
+    <div class="text-center mb-10">
+        <h2 class="articles-section__title">文章</h2>
+        <p class="text-sm text-[#8E827F]">静谧时光里的文字，值得细细品味</p>
+    </div>
+
+    <!-- 搜索 -->
+    <div class="max-w-md mx-auto mb-10">
+        <form method="GET" action="/articles" data-pjax class="relative">
+            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="搜索文章..."
+                   class="w-full px-5 py-3 bg-white/70 backdrop-blur-xl border border-[#E5E0DB]/50 rounded-full text-sm focus:outline-none focus:border-[#DDB8B8] focus:ring-2 focus:ring-[#DDB8B8]/20 transition-all placeholder:text-[#8E827F]/50">
+            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E827F] hover:text-[#DDB8B8] transition-colors">
+                <i class="ph ph-magnifying-glass text-lg"></i>
+            </button>
+        </form>
+        <?php if ($search): ?>
+        <div class="text-center mt-3">
+            <span class="text-xs text-[#8E827F]">搜索 "<?= htmlspecialchars($search) ?>" · <?= $total ?> 个结果</span>
+            <a href="/articles" data-pjax class="text-xs text-[#DDB8B8] hover:text-[#B28B8B] ml-2">
+                <i class="ph ph-x"></i> 清除
+            </a>
+        </div>
+        <?php endif; ?>
+    </div>
 
     <?php if (empty($articles)): ?>
         <div class="articles-empty">
@@ -306,7 +338,7 @@ $totalPages = $total > $per ? (int)ceil($total / $per) : 0;
     <?php if ($totalPages > 1): ?>
     <nav class="pagination" aria-label="文章分页">
         <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-            <a href="?page=<?= $p ?>"
+            <a href="?page=<?= $p ?><?= $search ? '&search='.urlencode($search) : '' ?>"
                class="pagination__dot <?= $p === $page ? 'pagination__dot--active' : '' ?>"
                aria-label="第 <?= $p ?> 页"
                <?= $p === $page ? 'aria-current="page"' : '' ?>></a>

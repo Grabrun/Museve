@@ -164,7 +164,7 @@ async function uploadCover(file) {
     formData.append('file', file);
 
     try {
-        const res = await fetch('/admin/api/upload', { method: 'POST', body: formData });
+        const res = await fetch('/admin/api/upload', { method: 'POST', body: formData, headers: { 'X-CSRF-Token': getCsrfToken() } });
         const data = await res.json();
         if (data.code === 200) {
             coverUrl.value = data.data.url;
@@ -204,7 +204,7 @@ async function saveArticle(status) {
     const method = data.id ? 'PUT' : 'POST';
     const res = await fetch('/admin/api/articles', {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: csrfHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(data)
     });
 

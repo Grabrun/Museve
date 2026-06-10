@@ -4,6 +4,18 @@
  */
 
 /* ==========================================
+ * 0. CSRF Token
+ * ========================================== */
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
+function csrfHeaders(headers = {}) {
+    return { ...headers, 'X-CSRF-Token': getCsrfToken() };
+}
+
+/* ==========================================
  * 1. Toast 通知
  * ========================================== */
 function showToast(message, type = 'success') {
@@ -57,7 +69,7 @@ async function deleteItem(type, id) {
     try {
         const res = await fetch(`/admin/api/${type}/${id}`, {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
+            headers: csrfHeaders({ 'Content-Type': 'application/json' }),
         });
         const data = await res.json();
 
