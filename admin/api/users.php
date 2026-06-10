@@ -47,7 +47,9 @@ switch ($method) {
         $stmt = $db->prepare("INSERT INTO users (account, username, password, role, created_at) VALUES (?, ?, ?, ?, NOW())");
         $stmt->execute([$account, $username, $hashedPassword, $role]);
 
-        jsonResponse(201, '用户创建成功', ['id' => $db->lastInsertId()]);
+        $newId = (int)$db->lastInsertId();
+        writeLog('create', 'user', $newId, "创建用户: $username ($account)");
+        jsonResponse(201, '用户创建成功', ['id' => $newId]);
         break;
 
     case 'PUT':
@@ -79,6 +81,7 @@ switch ($method) {
         $stmt = $db->prepare("UPDATE users SET " . implode(', ', $fields) . " WHERE id = ?");
         $stmt->execute($params);
 
+        writeLog('update', 'user', $id, "更新用户: $username");
         jsonResponse(200, '用户更新成功');
         break;
 
@@ -91,6 +94,7 @@ switch ($method) {
         $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
         $stmt->execute([$id]);
 
+        writeLog('delete', 'user', $id, '删除用户');
         jsonResponse(200, '用户删除成功');
         break;
 

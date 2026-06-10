@@ -20,6 +20,7 @@ if ($action === 'logout' && $method === 'POST') {
         $stmt = $db->prepare("UPDATE users SET cookie_token = '', token_expires = NULL WHERE cookie_token = ?");
         $stmt->execute([$token]);
     }
+    writeLog('logout', 'user', $user['id'] ?? 0, '退出登录');
     setcookie('museve_token', '', time() - 3600, '/', '', false, true);
     if (session_status() === PHP_SESSION_ACTIVE) session_destroy();
     jsonResponse(200, '已退出登录');
@@ -69,6 +70,7 @@ if ($method === 'POST' && $action === '') {
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
+    writeLog('login', 'user', $user['id'], "登录成功: {$user['account']}");
     jsonResponse(200, '登录成功', [
         'id' => $user['id'],
         'username' => $user['username'],

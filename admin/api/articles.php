@@ -91,7 +91,9 @@ switch ($method) {
             ':author_id' => $user['id'],
         ]);
 
-        jsonResponse(201, '创建成功', ['id' => (int)$db->lastInsertId()]);
+        $newId = (int)$db->lastInsertId();
+        writeLog('create', 'article', $newId, "创建文章: $title");
+        jsonResponse(201, '创建成功', ['id' => $newId]);
         break;
 
     case 'PUT':
@@ -129,6 +131,7 @@ switch ($method) {
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 
+        writeLog('update', 'article', $id, "更新文章: $title");
         jsonResponse(200, '更新成功');
         break;
 
@@ -140,6 +143,7 @@ switch ($method) {
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 
+        writeLog('delete', 'article', $id, '软删除文章');
         jsonResponse(200, '删除成功');
         break;
 

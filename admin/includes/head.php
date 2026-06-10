@@ -10,6 +10,7 @@ $menuItems = [
     '/admin/articles' => ['icon' => 'ph-article', 'label' => '文章管理'],
     '/admin/users' => ['icon' => 'ph-users', 'label' => '用户管理'],
     '/admin/settings' => ['icon' => 'ph-gear-six', 'label' => '网站设置'],
+    '/admin/logs' => ['icon' => 'ph-clock-counter-clockwise', 'label' => '操作日志'],
 ];
 ?>
 <!DOCTYPE html>

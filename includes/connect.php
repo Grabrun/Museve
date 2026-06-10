@@ -102,6 +102,23 @@ function autoCreateTables(PDO $db): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // 操作日志表
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS `logs` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `user_id` INT UNSIGNED NOT NULL DEFAULT 0,
+            `action` VARCHAR(50) NOT NULL,
+            `target_type` VARCHAR(50) NOT NULL DEFAULT '',
+            `target_id` INT UNSIGNED NOT NULL DEFAULT 0,
+            `detail` TEXT,
+            `ip` VARCHAR(45) NOT NULL DEFAULT '',
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_user_id` (`user_id`),
+            INDEX `idx_action` (`action`),
+            INDEX `idx_created_at` (`created_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
     // 首次建表后插入默认数据
     $stmt = $db->query("SELECT COUNT(*) AS cnt FROM `settings`");
     $row = $stmt->fetch();
@@ -179,6 +196,15 @@ function getPagination(int $defaultPer = 10): array {
 // 获取路由 ID 参数
 function getRouteId(): int {
     return intval($_GET['id'] ?? 0);
+}
+
+// 写入操作日志
+function writeLog(string $action, string $targetType = '', int $targetId = 0, string $detail = ''): void {
+    $db = getDB();
+    $userId = $_SESSION['admin_id'] ?? $_SESSION['user_id'] ?? 0;
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $stmt = $db->prepare("INSERT INTO logs (user_id, action, target_type, target_id, detail, ip) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$userId, $action, $targetType, $targetId, $detail, $ip]);
 }
 
 // 统一错误码常量

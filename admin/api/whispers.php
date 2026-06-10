@@ -65,7 +65,9 @@ switch ($method) {
             ':author_id' => $user['id'],
         ]);
 
-        jsonResponse(201, '创建成功', ['id' => (int)$db->lastInsertId()]);
+        $newId = (int)$db->lastInsertId();
+        writeLog('create', 'whisper', $newId, '创建悄悄话');
+        jsonResponse(201, '创建成功', ['id' => $newId]);
         break;
 
     case 'PUT':
@@ -79,6 +81,7 @@ switch ($method) {
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 
+        writeLog('update', 'whisper', $id, '更新悄悄话');
         jsonResponse(200, '更新成功');
         break;
 
@@ -89,6 +92,7 @@ switch ($method) {
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 
+        writeLog('delete', 'whisper', $id, '删除悄悄话');
         jsonResponse(200, '删除成功');
         break;
 

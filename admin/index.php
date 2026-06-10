@@ -75,12 +75,13 @@ if (preg_match('#^/admin/api/(.+)$#', $path, $m)) {
 
 // 后台页面路由
 $adminRoutes = [
-    '/admin'            => 'sections/dashboard.php',
+    '/admin'            => 'sections/home.php',
     '/admin/memories'   => 'sections/memories.php',
     '/admin/whispers'   => 'sections/whispers.php',
     '/admin/articles'   => 'sections/articles.php',
     '/admin/settings'   => 'sections/settings.php',
     '/admin/users'      => 'sections/users.php',
+    '/admin/logs'       => 'sections/logs.php',
 ];
 
 $content = null;
