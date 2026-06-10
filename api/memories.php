@@ -1,17 +1,23 @@
 <?php
-// 回忆 API
+// 回忆 API (公开)
 require_once __DIR__ . '/../includes/connect.php';
 
-$pdo = getDB();
 $method = getMethod();
 
 if ($method === 'GET') {
     [$page, $per, $offset] = getPagination();
 
-    $countStmt = $pdo->query("SELECT COUNT(*) FROM memories");
+    $countStmt = getDB()->query("SELECT COUNT(*) FROM memories");
     $total = (int)$countStmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT * FROM memories ORDER BY event_time DESC LIMIT :per OFFSET :offset");
+    $stmt = getDB()->prepare("
+        SELECT m.id, m.title, m.image, m.event_time, m.created_at,
+               u.username AS author_name
+        FROM memories m
+        LEFT JOIN users u ON m.author_id = u.id
+        ORDER BY m.event_time DESC
+        LIMIT :per OFFSET :offset
+    ");
     $stmt->bindValue(':per', $per, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -20,4 +26,4 @@ if ($method === 'GET') {
     jsonSuccess(['list' => $list, 'total' => $total, 'page' => $page, 'per' => $per]);
 }
 
-jsonResponse(405, 'Method Not Allowed');
+jsonResponse(405, '方法不允许');
