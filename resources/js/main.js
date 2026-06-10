@@ -10,23 +10,23 @@
   if (typeof Pjax === 'undefined') return;
 
   const pjax = new Pjax({
-    selectors: ['#museve-content'],
+    selectors: ['title', '#pjax-container'],
     cacheBust: false,
+    scrollTo: 0,
   });
 
   document.addEventListener('pjax:send', () => {
-    const content = document.querySelector('#museve-content');
+    const content = document.querySelector('#pjax-container');
     if (content) {
       content.classList.add('pjax-fade-out');
     }
   });
 
   document.addEventListener('pjax:complete', () => {
-    const content = document.querySelector('#museve-content');
+    const content = document.querySelector('#pjax-container');
     if (content) {
       content.classList.remove('pjax-fade-out');
       content.classList.add('pjax-fade-in');
-      // 移除动画类以便下次使用
       content.addEventListener('animationend', () => {
         content.classList.remove('pjax-fade-in');
       }, { once: true });
