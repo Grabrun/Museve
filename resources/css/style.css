@@ -2,6 +2,7 @@
 
 /* ---------- CSS 变量 ---------- */
 :root {
+  /* 品牌色板 */
   --twilight-white: #F9F7F4;     /* 暮光白 主背景 */
   --dusk-rose: #DDB8B8;          /* 薄暮玫瑰 主强调色 */
   --rose-deep: #B28B8B;          /* 玫瑰深 悬浮态 */
@@ -14,8 +15,36 @@
   --bean-red: #D18B8B;           /* 豆沙红 删除/错误 */
   --ash-blue: #9BADB7;           /* 灰蓝 已归档 */
 
+  /* 设计 Token */
+  --bg-primary: #F9F7F4;
+  --card-bg: rgba(255, 255, 255, 0.65);
+  --card-blur: blur(20px);
+  --accent: #DDB8B8;
+  --accent-hover: #B28B8B;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 50px;
+  --shadow-card: 0 4px 20px rgba(62, 54, 64, 0.06);
+  --shadow-hover: 0 12px 32px rgba(62, 54, 64, 0.12);
+  --text-primary: #3E3640;
+  --text-secondary: #8E827F;
+
+  /* 字体系统 */
   --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
-  --font-sans: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-handwrite: 'ZCOOL XiaoWei', 'Caveat', cursive;
+
+  /* 字号阶梯 */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-4xl: 2.25rem;
+
+  /* 兼容旧变量 */
   --shadow-sm: 0 1px 3px rgba(62, 54, 64, 0.06);
   --shadow-md: 0 4px 12px rgba(62, 54, 64, 0.1);
   --shadow-lg: 0 8px 30px rgba(62, 54, 64, 0.15);
@@ -409,3 +438,57 @@ img {
 .mb-1 { margin-bottom: 8px; }
 .mb-2 { margin-bottom: 16px; }
 .mb-3 { margin-bottom: 24px; }
+
+/* ---------- 移动端底部安全区 ---------- */
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- 背景纹理噪点 ---------- */
+.bg-noise {
+    position: relative;
+}
+.bg-noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---------- 加载指示器 ---------- */
+@keyframes bounce-dot {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+}
+.loading-dots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dusk-rose);
+    margin: 0 3px;
+    animation: bounce-dot 1.4s infinite ease-in-out both;
+}
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+/* ---------- Toast 通知 ---------- */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    color: white;
+    font-size: var(--text-sm);
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+}
+.toast.show { transform: translateX(0); }
+.toast.success { background: var(--fog-green); }
+.toast.error { background: var(--bean-red); }
+.toast.warning { background: var(--warm-orange); }

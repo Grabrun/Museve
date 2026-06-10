@@ -1,5 +1,5 @@
 <?php
-// 暮想 Museve 数据库连接
+// 暮想 Museve 数据库连接与自动建表
 $config = require __DIR__ . '/config.php';
 
 function getDB(): PDO {
@@ -22,7 +22,11 @@ function getDB(): PDO {
         } catch (PDOException $e) {
             http_response_code(500);
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['error' => '数据库连接失败', 'detail' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+            echo json_encode([
+                'code' => 500,
+                'message' => '数据库连接失败',
+                'data' => null
+            ], JSON_UNESCAPED_UNICODE);
             exit;
         }
     }
@@ -30,28 +34,34 @@ function getDB(): PDO {
 }
 
 function autoCreateTables(PDO $db): void {
+    // memories 回忆表
     $db->exec("
         CREATE TABLE IF NOT EXISTS `memories` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `title` VARCHAR(255) NOT NULL DEFAULT '',
             `image` VARCHAR(500) NOT NULL DEFAULT '',
-            `event_time` DATETIME NULL,
+            `event_time` DATETIME NOT NULL,
             `author_id` INT UNSIGNED NOT NULL DEFAULT 0,
-            `updated_at` DATETIME NULL,
-            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+            `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_author_id` (`author_id`),
+            INDEX `idx_event_time` (`event_time`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // whispers 悄悄话表
     $db->exec("
         CREATE TABLE IF NOT EXISTS `whispers` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `content` TEXT NOT NULL,
             `author_id` INT UNSIGNED NOT NULL DEFAULT 0,
-            `updated_at` DATETIME NULL,
-            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+            `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_author_id` (`author_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // articles 文章表
     $db->exec("
         CREATE TABLE IF NOT EXISTS `articles` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -59,11 +69,14 @@ function autoCreateTables(PDO $db): void {
             `content` LONGTEXT NOT NULL,
             `status` ENUM('draft','published','pending','archived','deleted') DEFAULT 'draft',
             `author_id` INT UNSIGNED NOT NULL DEFAULT 0,
-            `updated_at` DATETIME NULL,
-            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+            `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_author_id` (`author_id`),
+            INDEX `idx_status` (`status`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // users 用户表
     $db->exec("
         CREATE TABLE IF NOT EXISTS `users` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -74,11 +87,13 @@ function autoCreateTables(PDO $db): void {
             `avatar` VARCHAR(500) NOT NULL DEFAULT '',
             `cookie_token` VARCHAR(255) NOT NULL DEFAULT '',
             `token_expires` DATETIME NULL,
+            `last_login` DATETIME NULL,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-            `last_login` DATETIME NULL
+            INDEX `idx_cookie_token` (`cookie_token`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // settings 设置表
     $db->exec("
         CREATE TABLE IF NOT EXISTS `settings` (
             `key` VARCHAR(100) PRIMARY KEY,
@@ -86,19 +101,53 @@ function autoCreateTables(PDO $db): void {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
-    // 首次建表后插入默认设置
+    // 首次建表后插入默认数据
     $stmt = $db->query("SELECT COUNT(*) AS cnt FROM `settings`");
     $row = $stmt->fetch();
     if ($row['cnt'] == 0) {
-        $db->exec("INSERT INTO `settings` (`key`, `value`) VALUES ('site_title', '暮想')");
-        $db->exec("INSERT INTO `settings` (`key`, `value`) VALUES ('site_subtitle', '在薄暮时分，温柔地想起。')");
+        // 默认设置项
+        $defaults = [
+            'site_title'   => '暮想',
+            'site_subtitle' => '在薄暮时分，温柔地想起。',
+            'site_avatar'  => '/resources/images/default-avatar.png',
+            'site_logo'    => '/resources/images/logo.svg',
+            'quote_1'      => '时光会走远，记忆会永恒。',
+            'quote_2'      => '每一段回忆，都值得被温柔珍藏。',
+            'quote_3'      => '在薄暮时分，想起那些温暖的瞬间。',
+            'icp_number'   => '',
+            'copyright'    => '© 2026 暮想 Museve',
+        ];
+        $stmt = $db->prepare("INSERT INTO `settings` (`key`, `value`) VALUES (?, ?)");
+        foreach ($defaults as $key => $value) {
+            $stmt->execute([$key, $value]);
+        }
 
-        // 创建默认管理员
+        // 创建默认管理员 (admin / admin123)
         $adminPassword = password_hash('admin123', PASSWORD_BCRYPT, ['cost' => 12]);
         $stmt = $db->prepare("INSERT IGNORE INTO `users` (`account`, `username`, `password`, `role`) VALUES (?, ?, ?, ?)");
-        $stmt->execute(['admin', 'Admin', $adminPassword, 'admin']);
+        $stmt->execute(['admin', '管理员', $adminPassword, 'admin']);
+
+        // 创建上传目录
+        $dirs = [__DIR__ . '/../uploads/memories', __DIR__ . '/../uploads/avatars'];
+        foreach ($dirs as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+        }
     }
 }
 
 // 自动建表
 autoCreateTables(getDB());
+
+// 统一 JSON 响应函数
+function jsonResponse(int $code, string $message, $data = null): void {
+    http_response_code($code >= 400 ? $code : 200);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'code' => $code,
+        'message' => $message,
+        'data' => $data
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
