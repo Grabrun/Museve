@@ -8,77 +8,308 @@ $pdo = getDB();
 $countStmt = $pdo->query("SELECT COUNT(*) FROM articles WHERE status = 'published'");
 $total = (int)$countStmt->fetchColumn();
 
-$stmt = $pdo->prepare("SELECT a.*, u.username AS author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.status = 'published' ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
+$stmt = $pdo->prepare("SELECT a.*, u.username AS author_name, u.avatar AS author_avatar FROM articles a LEFT JOIN users u ON a.author_id = u.id WHERE a.status = 'published' ORDER BY a.created_at DESC LIMIT :per OFFSET :offset");
 $stmt->bindValue(':per', $per, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $articles = $stmt->fetchAll();
 
 /**
- * 估算阅读时间
+ * 估算阅读时间（每分钟 300 字）
  */
 function estimateReadTime(string $html): int {
     $text = strip_tags($html);
     $chars = mb_strlen($text);
-    return max(1, (int)ceil($chars / 500));
+    return max(1, (int)ceil($chars / 300));
 }
+
+$totalPages = $total > $per ? (int)ceil($total / $per) : 0;
 ?>
 
-<section class="max-w-5xl mx-auto px-4 py-16">
-    <h2 class="text-3xl font-serif text-[#3E3640] text-center mb-12">文章</h2>
+<style>
+/* ===== 文章列表 — 横向卡片 ===== */
+.articles-section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 64px 24px;
+}
+
+.articles-section__title {
+    font-family: var(--font-serif, serif);
+    font-size: 1.875rem;
+    color: var(--night-brown, #3E3640);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* ---------- 文章卡片列表 ---------- */
+.article-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.article-card {
+    display: flex;
+    gap: 24px;
+    padding: 20px;
+    background: #fff;
+    border-radius: var(--radius, 12px);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(62,54,64,.06));
+    transition: transform .3s ease, box-shadow .3s ease;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+}
+
+.article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover, 0 12px 32px rgba(62,54,64,.12));
+}
+
+/* 左侧封面 */
+.article-card__cover {
+    flex-shrink: 0;
+    width: 160px;
+    height: 120px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.article-card__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+}
+
+.article-card:hover .article-card__cover img {
+    transform: scale(1.06);
+}
+
+/* 无封面渐变占位 */
+.article-card__cover--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #DDB8B8, #A8C5DA);
+    font-size: 2rem;
+    opacity: .75;
+}
+
+/* 右侧文字区 */
+.article-card__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2px 0;
+}
+
+.article-card__title {
+    font-family: var(--font-serif, serif);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--night-brown, #3E3640);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+    transition: color .2s ease;
+}
+
+.article-card:hover .article-card__title {
+    color: var(--dusk-rose, #DDB8B8);
+}
+
+/* 摘要 80 字 + 渐变淡出 */
+.article-card__excerpt {
+    font-size: .875rem;
+    color: var(--age-gray, #8E827F);
+    line-height: 1.7;
+    position: relative;
+    max-height: 3.4em;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent);
+    mask-image: linear-gradient(to bottom, black 50%);
+}
+
+/* 底部元数据 */
+.article-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: .78rem;
+    color: var(--age-gray, #8E827F);
+    margin-top: 10px;
+}
+
+.article-card__author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.article-card__avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: linear-gradient(135deg, #DDB8B8, #A8C5DA);
+}
+
+.article-card__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .65rem;
+    color: #fff;
+    font-weight: 600;
+}
+
+.article-card__dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--age-gray, #8E827F);
+    opacity: .5;
+}
+
+/* ---------- 圆点分页 ---------- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+}
+
+.pagination__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(221,184,184,.3);
+    transition: all .3s ease;
+    text-decoration: none;
+    display: block;
+}
+
+.pagination__dot:hover {
+    background: rgba(221,184,184,.55);
+    transform: scale(1.15);
+}
+
+.pagination__dot--active {
+    width: 28px;
+    border-radius: 5px;
+    background: var(--dusk-rose, #DDB8B8);
+}
+
+/* ---------- 空状态 ---------- */
+.articles-empty {
+    text-align: center;
+    padding: 80px 24px;
+}
+
+.articles-empty__icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: .6;
+}
+
+.articles-empty__text {
+    font-size: 1.05rem;
+    color: var(--age-gray, #8E827F);
+    letter-spacing: .02em;
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 640px) {
+    .article-card {
+        flex-direction: column;
+        gap: 14px;
+        padding: 16px;
+    }
+    .article-card__cover {
+        width: 100%;
+        height: 160px;
+        border-radius: 8px;
+    }
+    .article-card__meta {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+</style>
+
+<section class="articles-section pjax-fade-in">
+    <h2 class="articles-section__title">文章</h2>
 
     <?php if (empty($articles)): ?>
-        <div class="text-center py-20">
-            <div class="text-5xl mb-4">📝</div>
-            <p class="text-[#8E827F] text-lg">还没有发布的文章。</p>
+        <div class="articles-empty">
+            <div class="articles-empty__icon">📝</div>
+            <p class="articles-empty__text">暂无文章</p>
         </div>
     <?php else: ?>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="article-list">
         <?php foreach ($articles as $article): ?>
             <?php
                 $readTime = estimateReadTime($article['content'] ?? '');
-                $summary = mb_strimwidth(strip_tags($article['content'] ?? ''), 0, 80, '...');
+                $summary  = mb_strimwidth(strip_tags($article['content'] ?? ''), 0, 80, '…');
+                $author   = $article['author_name'] ?? '暮想';
+                $avatar   = $article['author_avatar'] ?? '';
+                $initial  = mb_substr($author, 0, 1);
+                $dateStr  = date('Y-m-d', strtotime($article['created_at']));
             ?>
-            <a href="/read?id=<?= (int)$article['id'] ?>" class="group block bg-white/50 backdrop-blur-md rounded-xl border border-white/50 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                <!-- 封面图 -->
-                <div class="h-44 overflow-hidden">
+            <a href="/read?id=<?= (int)$article['id'] ?>" class="article-card">
+                <!-- 封面 -->
+                <div class="article-card__cover <?= empty($article['cover']) ? 'article-card__cover--empty' : '' ?>">
                     <?php if (!empty($article['cover'])): ?>
                         <img src="<?= htmlspecialchars($article['cover']) ?>"
                              alt="<?= htmlspecialchars($article['title']) ?>"
-                             loading="lazy"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                             loading="lazy">
                     <?php else: ?>
-                        <div class="w-full h-full bg-gradient-to-br from-[#DDB8B8]/40 via-[#A8C5DA]/30 to-[#87A878]/20"></div>
+                        <span>📖</span>
                     <?php endif; ?>
                 </div>
-                <!-- 内容 -->
-                <div class="p-5">
-                    <h3 class="text-lg font-serif text-[#3E3640] mb-2 line-clamp-2 group-hover:text-[#DDB8B8] transition-colors">
+
+                <!-- 文字区 -->
+                <div class="article-card__body">
+                    <h3 class="article-card__title">
                         <?= htmlspecialchars($article['title']) ?>
                     </h3>
-                    <p class="text-sm text-[#8E827F] leading-relaxed mb-4 relative overflow-hidden" style="max-height:3.2em;-webkit-mask-image:linear-gradient(to bottom,black 60%,transparent);mask-image:linear-gradient(to bottom,black 60%,transparent);">
+                    <p class="article-card__excerpt">
                         <?= htmlspecialchars($summary) ?>
                     </p>
-                    <div class="flex items-center justify-between text-xs text-[#8E827F]">
-                        <span><?= htmlspecialchars($article['author_name'] ?? '暮想') ?></span>
-                        <span class="flex items-center gap-3">
-                            <span><?= $readTime ?> 分钟阅读</span>
-                            <span><?= htmlspecialchars(date('Y-m-d', strtotime($article['created_at']))) ?></span>
+                    <div class="article-card__meta">
+                        <span class="article-card__author">
+                            <?php if ($avatar): ?>
+                                <img src="<?= htmlspecialchars($avatar) ?>" alt="" class="article-card__avatar">
+                            <?php else: ?>
+                                <span class="article-card__avatar article-card__avatar--placeholder"><?= htmlspecialchars($initial) ?></span>
+                            <?php endif; ?>
+                            <span><?= htmlspecialchars($author) ?></span>
                         </span>
+                        <span class="article-card__dot"></span>
+                        <span><?= $readTime ?> 分钟阅读</span>
+                        <span class="article-card__dot"></span>
+                        <span><?= $dateStr ?></span>
                     </div>
                 </div>
             </a>
         <?php endforeach; ?>
     </div>
 
-    <?php if ($total > $per): ?>
-    <nav class="flex justify-center gap-2 mt-12">
-        <?php $totalPages = ceil($total / $per); ?>
+    <?php if ($totalPages > 1): ?>
+    <nav class="pagination" aria-label="文章分页">
         <?php for ($p = 1; $p <= $totalPages; $p++): ?>
             <a href="?page=<?= $p ?>"
-               class="px-4 py-2 rounded-lg text-sm <?= $p === $page ? 'bg-[#DDB8B8] text-white' : 'bg-white/60 text-[#8E827F] hover:bg-[#DDB8B8]/20' ?> transition-colors">
-                <?= $p ?>
-            </a>
+               class="pagination__dot <?= $p === $page ? 'pagination__dot--active' : '' ?>"
+               aria-label="第 <?= $p ?> 页"
+               <?= $p === $page ? 'aria-current="page"' : '' ?>></a>
         <?php endfor; ?>
     </nav>
     <?php endif; ?>
