@@ -15,73 +15,76 @@ $siteSubtitle = $settings['site_subtitle'] ?? '在薄暮时分，温柔地想起
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - <?= htmlspecialchars($siteTitle) ?> 管理后台</title>
+    <link rel="icon" href="/resources/images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = {
         theme: {
             extend: {
                 colors: {
-                    'dusk-white': '#F9F7F4',
-                    'dusk-rose': '#C4A6B8',
-                    'dusk-text': '#3E3640',
-                    'dusk-muted': '#B8A9B0',
+                    'museve-bg': '#F9F7F4',
+                    'museve-rose': '#DDB8B8',
+                    'museve-rose-deep': '#B28B8B',
+                    'museve-night': '#3E3640',
+                    'museve-gray': '#8E827F',
+                },
+                fontFamily: {
+                    'serif': ['Noto Serif SC', 'serif'],
+                    'sans': ['Inter', 'system-ui', 'sans-serif'],
                 }
             }
         }
     }
     </script>
     <style>
-        body { font-family: 'Noto Serif SC', serif; }
-        .login-card {
-            animation: fadeUp 0.5s ease-out;
-        }
+        .login-card { animation: fadeUp 0.5s ease-out; }
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="bg-dusk-white text-dusk-text min-h-screen flex items-center justify-center px-4">
+<body class="bg-museve-bg text-museve-night min-h-screen flex items-center justify-center px-4 font-sans">
 
 <div class="login-card w-full max-w-sm">
     <!-- Brand -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold tracking-wide"><?= htmlspecialchars($siteTitle) ?></h1>
-        <p class="text-dusk-muted text-sm mt-2"><?= htmlspecialchars($siteSubtitle) ?></p>
+        <img src="/resources/images/logo.svg" alt="Logo" class="h-12 w-12 mx-auto mb-3">
+        <h1 class="text-2xl font-serif font-semibold tracking-wide"><?= htmlspecialchars($siteTitle) ?></h1>
+        <p class="text-museve-gray text-xs mt-1 font-serif"><?= htmlspecialchars($siteSubtitle) ?></p>
     </div>
 
     <!-- Login Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-[#EDE8E4] p-8">
-        <h2 class="text-lg font-semibold text-center mb-6">管理后台</h2>
+    <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-[0_4px_20px_rgba(62,54,64,0.06)] border border-white/60 p-8">
+        <h2 class="text-base font-semibold text-center mb-6 text-museve-night">后花园 · 管理后台</h2>
 
-        <div id="login-error" class="hidden bg-red-50 text-red-600 text-sm rounded-lg px-4 py-2 mb-4"></div>
+        <div id="login-error" class="hidden bg-[#D18B8B]/10 text-[#D18B8B] text-sm rounded-lg px-4 py-2.5 mb-4"></div>
 
         <form id="login-form" class="space-y-4">
             <div>
-                <label for="account" class="block text-sm font-medium mb-1.5">账号</label>
-                <input type="text" id="account" name="account" required
-                       class="w-full px-4 py-2.5 rounded-lg border border-[#EDE8E4] bg-[#FAFAF8] focus:outline-none focus:border-dusk-rose focus:ring-1 focus:ring-dusk-rose transition-colors"
-                       placeholder="请输入账号" autocomplete="username">
+                <label for="account" class="block text-xs font-medium text-museve-gray mb-1.5">账号</label>
+                <input type="text" id="account" name="account" required autocomplete="username"
+                       class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0DB] bg-[#F9F7F4] text-sm focus:outline-none focus:border-museve-rose focus:ring-1 focus:ring-museve-rose/30 transition-colors"
+                       placeholder="请输入账号">
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-medium mb-1.5">密码</label>
-                <input type="password" id="password" name="password" required
-                       class="w-full px-4 py-2.5 rounded-lg border border-[#EDE8E4] bg-[#FAFAF8] focus:outline-none focus:border-dusk-rose focus:ring-1 focus:ring-dusk-rose transition-colors"
-                       placeholder="请输入密码" autocomplete="current-password">
+                <label for="password" class="block text-xs font-medium text-museve-gray mb-1.5">密码</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password"
+                       class="w-full px-4 py-2.5 rounded-lg border border-[#E5E0DB] bg-[#F9F7F4] text-sm focus:outline-none focus:border-museve-rose focus:ring-1 focus:ring-museve-rose/30 transition-colors"
+                       placeholder="请输入密码">
             </div>
 
             <button type="submit" id="login-btn"
-                    class="w-full py-2.5 bg-dusk-rose text-white font-medium rounded-lg hover:bg-[#B898A8] active:bg-[#A88898] transition-colors focus:outline-none focus:ring-2 focus:ring-dusk-rose focus:ring-offset-2">
+                    class="w-full py-2.5 bg-museve-rose text-white text-sm font-medium rounded-lg hover:bg-museve-rose-deep active:bg-[#A07878] transition-colors focus:outline-none focus:ring-2 focus:ring-museve-rose focus:ring-offset-2 disabled:opacity-50">
                 登 录
             </button>
         </form>
     </div>
 
-    <!-- Footer -->
-    <p class="text-center text-xs text-dusk-muted mt-6">
-        &copy; <?= date('Y') ?> <?= htmlspecialchars($siteTitle) ?>
-    </p>
+    <p class="text-center text-xs text-museve-gray/50 mt-6">&copy; <?= date('Y') ?> <?= htmlspecialchars($siteTitle) ?></p>
 </div>
 
 <script>
@@ -109,10 +112,10 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
-        if (data.success) {
-            window.location.href = data.redirect || '/admin';
+        if (data.code === 200) {
+            window.location.href = '/admin';
         } else {
-            errDiv.textContent = data.error || '登录失败';
+            errDiv.textContent = data.message || '登录失败';
             errDiv.classList.remove('hidden');
             btn.disabled = false;
             btn.textContent = '登 录';

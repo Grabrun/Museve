@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DDB8B8"/>
+      <stop offset="100%" style="stop-color:#A8C5DA"/>
+    </linearGradient>
+  </defs>
+  <!-- 玻璃容器 -->
+  <rect x="20" y="15" width="60" height="70" rx="8" ry="8" fill="none" stroke="url(#grad)" stroke-width="3" opacity="0.8"/>
+  <!-- 暮光 -->
+  <ellipse cx="50" cy="50" rx="22" ry="28" fill="url(#grad)" opacity="0.4"/>
+  <!-- 光点 -->
+  <circle cx="42" cy="40" r="3" fill="#DDB8B8" opacity="0.7"/>
+  <circle cx="55" cy="45" r="2" fill="#A8C5DA" opacity="0.6"/>
+  <circle cx="48" cy="55" r="2.5" fill="#DDB8B8" opacity="0.5"/>
+</svg>
