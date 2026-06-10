@@ -1,0 +1,21 @@
+# Museve .gitignore
+
+# 配置文件（含数据库密码）
+includes/config.php
+
+# 上传文件
+uploads/*
+!uploads/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
