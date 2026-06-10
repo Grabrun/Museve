@@ -8,11 +8,14 @@
 
 - 🕰️ **回忆时光轴** — 左右交替卡片，滚动淡入动画
 - 💬 **悄悄话气泡流** — 四色柔和气泡，无限滚动加载
-- 📝 **文章系统** — TinyMCE 编辑器，720px 沉浸式阅读
+- 📝 **文章系统** — TinyMCE 编辑器，720px 沉浸式阅读，关键词搜索
 - 🔐 **权限管理** — admin/author 双角色，CSRF 防护，登录锁定
 - 🎨 **情感化设计** — 毛玻璃质感、打字机引语、品牌暮光配色
 - 📱 **响应式** — 移动端底部导航，桌面端时间轴布局
 - ⚡ **Pjax 无刷新** — 页面切换零等待
+- 🔍 **SEO 优化** — Open Graph + Twitter Card + 动态 Sitemap
+- 🛡️ **安全防护** — CSRF Token + XSS 过滤 + 安全头
+- 💾 **数据备份** — 一键备份脚本，30 天自动清理
 
 ## 🛠 技术栈
 
@@ -31,7 +34,7 @@
 git clone https://github.com/Grabrun/Museve.git
 
 # 2. 配置数据库
-cp includes/config.php.example includes/config.php
+cp includes/config.example.php includes/config.php
 # 编辑 config.php 填写数据库信息
 
 # 3. 设置 Nginx
@@ -50,7 +53,7 @@ Museve/
 │   ├── index.php          # 后台统一入口
 │   ├── login.php          # 登录页
 │   ├── sections/          # 后台页面 (7 个)
-│   └── api/               # 后台 API (7 个)
+│   └── api/               # 后台 API (8 个)
 ├── sections/              # 前端页面 (7 个)
 ├── api/                   # 前端 API (4 个)
 ├── includes/              # 公共组件
@@ -58,6 +61,7 @@ Museve/
 │   ├── css/               # 样式文件
 │   ├── js/                # 脚本文件
 │   └── images/            # 品牌资源
+├── scripts/               # 运维脚本
 ├── uploads/               # 上传文件
 ├── docs/                  # 设计文档
 ├── nginx.conf             # Nginx 配置模板
