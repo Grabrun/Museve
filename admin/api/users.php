@@ -7,6 +7,9 @@ $currentUser = requireAuth();
 $method = $_SERVER['REQUEST_METHOD'];
 $db = getDB();
 
+// 非 GET 请求验证 CSRF
+if ($method !== 'GET') verifyCsrfToken();
+
 switch ($method) {
     case 'GET':
         $page = max(1, intval($_GET['page'] ?? 1));
