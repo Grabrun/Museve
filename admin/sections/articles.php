@@ -6,24 +6,34 @@ $per = 10;
 $offset = ($page - 1) * $per;
 $status = $_GET['status'] ?? '';
 
-$where = '';
-$params = [];
-if ($status && in_array($status, ['draft','published','pending','archived','deleted'])) {
-    $where = "WHERE a.status = ?";
-    $params[] = $status;
+// 默认值
+$list = [];
+$total = 0;
+$totalPages = 0;
+
+try {
+    $where = '';
+    $params = [];
+    if ($status && in_array($status, ['draft','published','pending','archived','deleted'])) {
+        $where = "WHERE a.status = ?";
+        $params[] = $status;
+    }
+
+    $countStmt = $db->prepare("SELECT COUNT(*) FROM articles a $where");
+    $countStmt->execute($params);
+    $total = (int)$countStmt->fetchColumn();
+
+    $stmt = $db->prepare("SELECT a.*, u.username as author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id $where ORDER BY a.id DESC LIMIT :limit OFFSET :offset");
+    foreach ($params as $i => $p) $stmt->bindValue($i + 1, $p);
+    $stmt->bindValue(':limit', $per, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $totalPages = ceil($total / $per);
+} catch (PDOException $e) {
+    error_log('[Museve] 文章管理查询失败: ' . $e->getMessage());
 }
-
-$total = $db->prepare("SELECT COUNT(*) FROM articles a $where");
-$total->execute($params);
-$total = $total->fetchColumn();
-
-$stmt = $db->prepare("SELECT a.*, u.username as author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id $where ORDER BY a.id DESC LIMIT :limit OFFSET :offset");
-foreach ($params as $i => $p) $stmt->bindValue($i + 1, $p);
-$stmt->bindValue(':limit', $per, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$list = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$totalPages = ceil($total / $per);
 
 $statusColors = [
     'published' => 'bg-[#87A878]/20 text-[#87A878]',

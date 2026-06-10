@@ -2,53 +2,70 @@
 // 后台仪表盘
 $db = getDB();
 
+// 默认值（防止查询异常时模板变量未定义）
 $stats = [];
-$tables = ['memories', 'whispers', 'articles', 'users'];
-foreach ($tables as $table) {
-    $stats[$table] = $db->query("SELECT COUNT(*) FROM $table")->fetchColumn();
+$activities = [];
+$diskUsed = 0;
+$diskPercent = 0;
+$diskLimit = 500;
+$phpVersion = PHP_VERSION;
+$mysqlVersion = '未知';
+$cards = [];
+
+try {
+    $tables = ['memories', 'whispers', 'articles', 'users'];
+
+    // 统计各表总数
+    foreach ($tables as $table) {
+        $stats[$table] = $db->query("SELECT COUNT(*) FROM $table")->fetchColumn();
+    }
+
+    // 本周趋势
+    $weekAgo = date('Y-m-d H:i:s', strtotime('-7 days'));
+    foreach ($tables as $table) {
+        $stmt = $db->prepare("SELECT COUNT(*) FROM $table WHERE created_at > ?");
+        $stmt->execute([$weekAgo]);
+        $stats[$table . '_week'] = $stmt->fetchColumn();
+    }
+
+    // 最近活动
+    $recentMemories = $db->query("SELECT '回忆' as type, title as content, created_at FROM memories ORDER BY id DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+    $recentWhispers = $db->query("SELECT '悄悄话' as type, LEFT(content, 50) as content, created_at FROM whispers ORDER BY id DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+    $recentArticles = $db->query("SELECT '文章' as type, title as content, created_at FROM articles ORDER BY id DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+
+    $activities = array_merge($recentMemories, $recentWhispers, $recentArticles);
+    usort($activities, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+    $activities = array_slice($activities, 0, 5);
+
+    // MySQL 版本
+    $mysqlVersion = $db->query("SELECT VERSION()")->fetchColumn();
+
+    // 统计卡片配置
+    $cards = [
+        ['label' => '回忆', 'count' => $stats['memories'] ?? 0, 'week' => $stats['memories_week'] ?? 0, 'color' => '#DDB8B8', 'icon' => 'ph-clock-counter-clockwise'],
+        ['label' => '悄悄话', 'count' => $stats['whispers'] ?? 0, 'week' => $stats['whispers_week'] ?? 0, 'color' => '#A8C5DA', 'icon' => 'ph-chat-circle-dots'],
+        ['label' => '文章', 'count' => $stats['articles'] ?? 0, 'week' => $stats['articles_week'] ?? 0, 'color' => '#87A878', 'icon' => 'ph-article'],
+        ['label' => '用户', 'count' => $stats['users'] ?? 0, 'week' => $stats['users_week'] ?? 0, 'color' => '#E0A96D', 'icon' => 'ph-users'],
+    ];
+} catch (PDOException $e) {
+    error_log('[Museve] 仪表盘查询失败: ' . $e->getMessage());
 }
 
-// 本周趋势
-$weekAgo = date('Y-m-d H:i:s', strtotime('-7 days'));
-foreach ($tables as $table) {
-    $stmt = $db->prepare("SELECT COUNT(*) FROM $table WHERE created_at > ?");
-    $stmt->execute([$weekAgo]);
-    $stats[$table . '_week'] = $stmt->fetchColumn();
-}
-
-// 最近活动
-$recentMemories = $db->query("SELECT '回忆' as type, title as content, created_at FROM memories ORDER BY id DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
-$recentWhispers = $db->query("SELECT '悄悄话' as type, LEFT(content, 50) as content, created_at FROM whispers ORDER BY id DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
-$recentArticles = $db->query("SELECT '文章' as type, title as content, created_at FROM articles ORDER BY id DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
-
-$activities = array_merge($recentMemories, $recentWhispers, $recentArticles);
-usort($activities, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
-$activities = array_slice($activities, 0, 5);
-
-// 磁盘使用
+// 磁盘使用（文件系统操作，单独处理）
 $uploadDir = __DIR__ . '/../../uploads';
 $totalSize = 0;
-if (is_dir($uploadDir)) {
-    $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($uploadDir));
-    foreach ($iter as $file) {
-        if ($file->isFile()) $totalSize += $file->getSize();
+try {
+    if (is_dir($uploadDir)) {
+        $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($uploadDir));
+        foreach ($iter as $file) {
+            if ($file->isFile()) $totalSize += $file->getSize();
+        }
     }
+} catch (Exception $e) {
+    error_log('[Museve] 磁盘扫描失败: ' . $e->getMessage());
 }
 $diskUsed = round($totalSize / 1024 / 1024, 2);
-$diskLimit = 500; // MB
 $diskPercent = min(100, round($diskUsed / $diskLimit * 100));
-
-// 系统信息
-$phpVersion = PHP_VERSION;
-$mysqlVersion = $db->query("SELECT VERSION()")->fetchColumn();
-
-// 统计卡片配置
-$cards = [
-    ['label' => '回忆', 'count' => $stats['memories'], 'week' => $stats['memories_week'], 'color' => '#DDB8B8', 'icon' => 'ph-clock-counter-clockwise'],
-    ['label' => '悄悄话', 'count' => $stats['whispers'], 'week' => $stats['whispers_week'], 'color' => '#A8C5DA', 'icon' => 'ph-chat-circle-dots'],
-    ['label' => '文章', 'count' => $stats['articles'], 'week' => $stats['articles_week'], 'color' => '#87A878', 'icon' => 'ph-article'],
-    ['label' => '用户', 'count' => $stats['users'], 'week' => $stats['users_week'], 'color' => '#E0A96D', 'icon' => 'ph-users'],
-];
 ?>
 
 <div class="mb-8">

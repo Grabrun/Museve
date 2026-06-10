@@ -6,25 +6,34 @@ $per = 10;
 $offset = ($page - 1) * $per;
 $search = trim($_GET['search'] ?? '');
 
-$where = '';
-$params = [];
-if ($search) {
-    $where = "WHERE title LIKE ?";
-    $params[] = "%$search%";
+// 默认值
+$list = [];
+$total = 0;
+$totalPages = 0;
+
+try {
+    $where = '';
+    $params = [];
+    if ($search) {
+        $where = "WHERE title LIKE ?";
+        $params[] = "%$search%";
+    }
+
+    $countStmt = $db->prepare("SELECT COUNT(*) FROM memories $where");
+    $countStmt->execute($params);
+    $total = (int)$countStmt->fetchColumn();
+
+    $stmt = $db->prepare("SELECT m.*, u.username as author_name FROM memories m LEFT JOIN users u ON m.author_id = u.id $where ORDER BY m.id DESC LIMIT :limit OFFSET :offset");
+    foreach ($params as $i => $p) $stmt->bindValue($i + 1, $p);
+    $stmt->bindValue(':limit', $per, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $totalPages = ceil($total / $per);
+} catch (PDOException $e) {
+    error_log('[Museve] 回忆管理查询失败: ' . $e->getMessage());
 }
-
-$total = $db->prepare("SELECT COUNT(*) FROM memories $where");
-$total->execute($params);
-$total = $total->fetchColumn();
-
-$stmt = $db->prepare("SELECT m.*, u.username as author_name FROM memories m LEFT JOIN users u ON m.author_id = u.id $where ORDER BY m.id DESC LIMIT :limit OFFSET :offset");
-foreach ($params as $i => $p) $stmt->bindValue($i + 1, $p);
-$stmt->bindValue(':limit', $per, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$list = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$totalPages = ceil($total / $per);
 ?>
 
 <div class="flex items-center justify-between mb-6">

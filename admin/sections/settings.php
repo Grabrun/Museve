@@ -2,10 +2,16 @@
 // 后台 - 网站设置
 $db = getDB();
 
-$stmt = $db->query("SELECT `key`, `value` FROM settings");
+// 默认值
 $settings = [];
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $settings[$row['key']] = $row['value'];
+
+try {
+    $stmt = $db->query("SELECT `key`, `value` FROM settings");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $settings[$row['key']] = $row['value'];
+    }
+} catch (PDOException $e) {
+    error_log('[Museve] 网站设置查询失败: ' . $e->getMessage());
 }
 ?>
 

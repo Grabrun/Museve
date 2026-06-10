@@ -4,32 +4,41 @@ $db = getDB();
 [$page, $per, $offset] = getPagination(20);
 $action = trim($_GET['action'] ?? '');
 
-$where = '';
-$params = [];
-if ($action) {
-    $where = "WHERE l.action = :action";
-    $params[':action'] = $action;
+// 默认值
+$logs = [];
+$total = 0;
+$totalPages = 0;
+
+try {
+    $where = '';
+    $params = [];
+    if ($action) {
+        $where = "WHERE l.action = :action";
+        $params[':action'] = $action;
+    }
+
+    $countStmt = $db->prepare("SELECT COUNT(*) FROM logs l $where");
+    $countStmt->execute($params);
+    $total = (int)$countStmt->fetchColumn();
+
+    $stmt = $db->prepare("
+        SELECT l.*, u.username, u.account
+        FROM logs l
+        LEFT JOIN users u ON l.user_id = u.id
+        $where
+        ORDER BY l.created_at DESC
+        LIMIT :per OFFSET :offset
+    ");
+    foreach ($params as $k => $v) $stmt->bindValue($k, $v);
+    $stmt->bindValue(':per', $per, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $logs = $stmt->fetchAll();
+
+    $totalPages = ceil($total / $per);
+} catch (PDOException $e) {
+    error_log('[Museve] 操作日志查询失败: ' . $e->getMessage());
 }
-
-$countStmt = $db->prepare("SELECT COUNT(*) FROM logs l $where");
-$countStmt->execute($params);
-$total = (int)$countStmt->fetchColumn();
-
-$stmt = $db->prepare("
-    SELECT l.*, u.username, u.account
-    FROM logs l
-    LEFT JOIN users u ON l.user_id = u.id
-    $where
-    ORDER BY l.created_at DESC
-    LIMIT :per OFFSET :offset
-");
-foreach ($params as $k => $v) $stmt->bindValue($k, $v);
-$stmt->bindValue(':per', $per, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$logs = $stmt->fetchAll();
-
-$totalPages = ceil($total / $per);
 
 $actionLabels = [
     'login' => ['label' => '登录', 'color' => 'museve-green'],

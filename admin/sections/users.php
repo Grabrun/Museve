@@ -3,8 +3,15 @@
 $db = getDB();
 $currentUser = $_SESSION['user'] ?? [];
 
-$stmt = $db->query("SELECT id, account, username, role, avatar, created_at, last_login FROM users ORDER BY id DESC");
-$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// 默认值
+$users = [];
+
+try {
+    $stmt = $db->query("SELECT id, account, username, role, avatar, created_at, last_login FROM users ORDER BY id DESC");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log('[Museve] 用户管理查询失败: ' . $e->getMessage());
+}
 
 $roleLabels = ['admin' => '管理员', 'author' => '作者'];
 $roleColors = ['admin' => 'bg-[#DDB8B8]/20 text-[#DDB8B8]', 'author' => 'bg-[#A8C5DA]/20 text-[#A8C5DA]'];
@@ -21,7 +28,9 @@ $roleColors = ['admin' => 'bg-[#DDB8B8]/20 text-[#DDB8B8]', 'author' => 'bg-[#A8
             <tr><th class="px-5 py-3">头像</th><th class="px-5 py-3">昵称</th><th class="px-5 py-3">账号</th><th class="px-5 py-3">角色</th><th class="px-5 py-3">注册时间</th><th class="px-5 py-3">最后登录</th><th class="px-5 py-3">操作</th></tr>
         </thead>
         <tbody>
-            <?php foreach ($users as $user): ?>
+            <?php if (empty($users)): ?>
+            <tr><td colspan="7" class="px-5 py-10 text-center text-[#8E827F]">暂无用户</td></tr>
+            <?php else: foreach ($users as $user): ?>
             <tr class="border-t border-[#F5F2F0] hover:bg-[#F9F7F4]/50">
                 <td class="px-5 py-3">
                     <img src="<?= htmlspecialchars($user['avatar'] ?: '/resources/images/default-avatar.png') ?>" class="w-10 h-10 rounded-full object-cover">
@@ -37,7 +46,7 @@ $roleColors = ['admin' => 'bg-[#DDB8B8]/20 text-[#DDB8B8]', 'author' => 'bg-[#A8
                     <?php endif; ?>
                 </td>
             </tr>
-            <?php endforeach; ?>
+            <?php endforeach; endif; ?>
         </tbody>
     </table>
 </div>

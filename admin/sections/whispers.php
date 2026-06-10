@@ -5,13 +5,24 @@ $page = max(1, intval($_GET['page'] ?? 1));
 $per = 15;
 $offset = ($page - 1) * $per;
 
-$total = $db->query("SELECT COUNT(*) FROM whispers")->fetchColumn();
-$stmt = $db->prepare("SELECT w.*, u.username as author_name FROM whispers w LEFT JOIN users u ON w.author_id = u.id ORDER BY w.id DESC LIMIT :limit OFFSET :offset");
-$stmt->bindValue(':limit', $per, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$list = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$totalPages = ceil($total / $per);
+// 默认值
+$list = [];
+$total = 0;
+$totalPages = 0;
+
+try {
+    $total = (int)$db->query("SELECT COUNT(*) FROM whispers")->fetchColumn();
+
+    $stmt = $db->prepare("SELECT w.*, u.username as author_name FROM whispers w LEFT JOIN users u ON w.author_id = u.id ORDER BY w.id DESC LIMIT :limit OFFSET :offset");
+    $stmt->bindValue(':limit', $per, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $totalPages = ceil($total / $per);
+} catch (PDOException $e) {
+    error_log('[Museve] 悄悄话管理查询失败: ' . $e->getMessage());
+}
 ?>
 
 <div class="flex items-center justify-between mb-6">
