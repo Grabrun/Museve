@@ -141,6 +141,11 @@ function autoCreateTables(PDO $db): void {
 // 自动建表
 autoCreateTables(getDB());
 
+// 成功响应快捷函数
+function jsonSuccess($data = null, string $message = 'success'): void {
+    jsonResponse(200, $message, $data);
+}
+
 // 统一 JSON 响应函数
 function jsonResponse(int $code, string $message, $data = null): void {
     http_response_code($code >= 400 ? $code : 200);

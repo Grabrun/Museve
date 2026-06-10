@@ -78,6 +78,32 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                    class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
         </div>
     </div>
+
+    <!-- 引语设置 -->
+    <div class="bg-white rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-[#3E3640] mb-2">引语设置</h2>
+        <p class="text-xs text-[#8E827F] mb-4">首页打字机效果依次展示的引语，留空则使用默认值。</p>
+        <div class="space-y-4">
+            <div>
+                <label class="text-sm text-[#8E827F]">引语 1</label>
+                <input type="text" name="quote_1" value="<?= htmlspecialchars($settings['quote_1'] ?? '') ?>"
+                       placeholder="在薄暮时分，温柔地想起。"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+            <div>
+                <label class="text-sm text-[#8E827F]">引语 2</label>
+                <input type="text" name="quote_2" value="<?= htmlspecialchars($settings['quote_2'] ?? '') ?>"
+                       placeholder="时光如水，回忆如花。"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+            <div>
+                <label class="text-sm text-[#8E827F]">引语 3</label>
+                <input type="text" name="quote_3" value="<?= htmlspecialchars($settings['quote_3'] ?? '') ?>"
+                       placeholder="你的回忆，值得被温柔珍藏。"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+        </div>
+    </div>
 </form>
 
 <script>
