@@ -2,6 +2,23 @@
 // 暮想 Museve 后台认证助手
 require_once __DIR__ . '/../../includes/connect.php';
 
+// ============================================================
+// 方法覆盖: POST 请求支持 _method=PUT/DELETE → 绕过 WAF 405
+// ============================================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 优先检查 URL 编码的 _method (DELETE 使用)
+    $override = $_POST['_method'] ?? null;
+    // 再检查 JSON body 中的 _method (PUT 使用)
+    if (!$override) {
+        $rawBody = file_get_contents('php://input');
+        $body = json_decode($rawBody, true);
+        $override = $body['_method'] ?? null;
+    }
+    if ($override && in_array(strtoupper($override), ['PUT', 'DELETE'])) {
+        $_SERVER['REQUEST_METHOD'] = strtoupper($override);
+    }
+}
+
 /**
  * 验证后台登录状态，返回用户信息或终止请求
  */

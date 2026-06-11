@@ -143,9 +143,9 @@ async function saveSettings() {
     });
 
     const res = await fetch('/admin/api/settings', {
-        method: 'PUT',
+        method: 'POST',
         headers: csrfHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(data)
+        body: JSON.stringify({ ...data, _method: 'PUT' })
     });
 
     const result = await res.json();

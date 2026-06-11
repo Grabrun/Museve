@@ -68,8 +68,9 @@ async function deleteItem(type, id) {
 
     try {
         const res = await fetch(`/admin/api/${type}/${id}`, {
-            method: 'DELETE',
+            method: 'POST',
             headers: csrfHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ _method: 'DELETE' })
         });
         const data = await res.json();
 

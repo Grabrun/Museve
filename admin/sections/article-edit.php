@@ -202,8 +202,10 @@ async function saveArticle(status) {
         status: status
     };
 
-    const method = data.id ? 'PUT' : 'POST';
-    const res = await fetch('/admin/api/articles', {
+    const method = 'POST';
+    if (data.id) data._method = 'PUT';
+    const url = data.id ? '/admin/api/articles/' + data.id : '/admin/api/articles';
+    const res = await fetch(url, {
         method,
         headers: csrfHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(data)

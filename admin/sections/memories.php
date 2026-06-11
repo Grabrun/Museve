@@ -197,11 +197,12 @@ async function saveMemory() {
     if (!data.title) { showToast('请输入标题', 'error'); return; }
     if (!data.event_time) { showToast('请选择事件时间', 'error'); return; }
 
-    const method = id ? 'PUT' : 'POST';
-    if (id) data.id = id;
+    const method = 'POST';
+    if (id) data._method = 'PUT';
+    const url = id ? '/admin/api/memories/' + id : '/admin/api/memories';
 
     try {
-        const res = await fetch('/admin/api/memories', {
+        const res = await fetch(url, {
             method,
             headers: csrfHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(data)

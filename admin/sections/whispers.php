@@ -162,10 +162,10 @@ async function saveWhisper() {
     if (!content) { showToast('请输入内容', 'error'); return; }
 
     try {
-        const res = await fetch('/admin/api/whispers', {
-            method: 'PUT',
+        const res = await fetch('/admin/api/whispers/' + id, {
+            method: 'POST',
             headers: csrfHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ id: id, content: content })
+            body: JSON.stringify({ _method: 'PUT', content: content })
         });
         const result = await res.json();
 
