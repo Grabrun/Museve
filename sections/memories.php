@@ -122,6 +122,19 @@ $memories = $stmt->fetchAll();
 (function() {
     'use strict';
 
+    // 初始条目的滚动淡入动画
+    var revealObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.memory-item.scroll-reveal:not(.revealed)').forEach(function(el) {
+        revealObserver.observe(el);
+    });
+
     var timeline = document.getElementById('memories-timeline');
     var sentinel = document.getElementById('memories-sentinel');
     var loadingEl = document.getElementById('memories-loading');
