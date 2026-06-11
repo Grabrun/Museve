@@ -59,14 +59,13 @@ switch ($method) {
         $content = trim($body['content'] ?? '');
         if (empty($content)) jsonResponse(400, '内容不能为空');
 
+        $signature = trim($body['signature'] ?? '');
         $createdAt = $body['created_at'] ?? null;
         if ($createdAt && !strtotime($createdAt)) $createdAt = null;
         
-        $sql = $createdAt 
-            ? "INSERT INTO whispers (content, author_id, created_at) VALUES (:content, :author_id, :created_at)"
-            : "INSERT INTO whispers (content, author_id, created_at) VALUES (:content, :author_id, NOW())";
-        $stmt = $db->prepare($sql);
+        $stmt = $db->prepare("INSERT INTO whispers (content, signature, author_id, created_at) VALUES (:content, :signature, :author_id, " . ($createdAt ? ":created_at" : "NOW()") . ")");
         $stmt->bindValue(':content', $content);
+        $stmt->bindValue(':signature', $signature);
         $stmt->bindValue(':author_id', $user['id']);
         if ($createdAt) $stmt->bindValue(':created_at', $createdAt);
         $stmt->execute();
@@ -84,6 +83,12 @@ switch ($method) {
 
         $fields = ['content = :content'];
         $params = [':content' => $content];
+        
+        $signature = trim($body['signature'] ?? '');
+        if ($signature) {
+            $fields[] = 'signature = :signature';
+            $params[':signature'] = $signature;
+        }
         
         $createdAt = $body['created_at'] ?? null;
         if ($createdAt && strtotime($createdAt)) {

@@ -17,7 +17,7 @@ if ($method === 'GET') {
         $total = (int)$countStmt->fetchColumn();
 
         $stmt = $db->prepare("
-            SELECT w.id, w.content, w.created_at,
+            SELECT w.id, w.content, w.signature, w.created_at,
                    u.username, u.avatar
             FROM whispers w
             LEFT JOIN users u ON w.author_id = u.id

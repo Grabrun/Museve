@@ -138,7 +138,7 @@ $bubbleColors = [
                      onerror="this.src='/resources/images/default-avatar.png'">
                 <div class="flex-1 min-w-0">
                     <div class="whisper-bubble" style="background: <?= $bg ?>; border-color: <?= str_replace(',0.15)', ',0.3)', str_replace(',0.12)', ',0.25)', $bg)) ?>">
-                        <p class="whisper-name"><?= htmlspecialchars($whisper['username'] ?? '匿名') ?></p>
+                        <p class="whisper-name"><?= htmlspecialchars($whisper['signature'] ?: ($whisper['username'] ?? '匿名')) ?></p>
                         <p class="whisper-content"><?= nl2br(htmlspecialchars($whisper['content'] ?? '')) ?></p>
                     </div>
                     <time class="whisper-time block mt-2 ml-1"><?= htmlspecialchars($whisper['created_at'] ?? '') ?></time>
@@ -214,7 +214,7 @@ $bubbleColors = [
         function appendWhisper(w, idx) {
             var color = BUBBLE_COLORS[idx % BUBBLE_COLORS.length];
             var avatar = escapeHtml(w.avatar || '/resources/images/default-avatar.svg');
-            var username = escapeHtml(w.username || '匿名');
+            var username = escapeHtml(w.signature || w.username || '匿名');
             var content = escapeHtml(w.content || '').replace(/\n/g, '<br>');
             var time = escapeHtml(w.created_at || '');
 

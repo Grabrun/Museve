@@ -61,6 +61,7 @@ const TABLE_DEFINITIONS = [
         CREATE TABLE IF NOT EXISTS `whispers` (
             `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `content` TEXT NOT NULL,
+            `signature` VARCHAR(100) NOT NULL DEFAULT '',
             `author_id` INT UNSIGNED NOT NULL DEFAULT 0,
             `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,

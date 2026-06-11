@@ -184,12 +184,13 @@ async function saveWhisper() {
     const id = form.querySelector('[name=id]').value;
     const content = form.querySelector('[name=content]').value.trim();
     const created_at = form.querySelector('[name=created_at]').value;
+    const signature = form.querySelector('[name=username]').value.trim();
 
     if (!content) { showToast('请输入内容', 'error'); return; }
 
     const isCreate = !id;
     const url = isCreate ? '/admin/api/whispers' : '/admin/api/whispers/' + id;
-    const body = { content: content };
+    const body = { content: content, signature: signature };
     if (created_at) body.created_at = created_at;
     if (!isCreate) body._method = 'PUT';
 
