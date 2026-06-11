@@ -81,7 +81,7 @@ switch ($method) {
         $stmt = $db->prepare("UPDATE users SET " . implode(', ', $fields) . " WHERE id = ?");
         $stmt->execute($params);
 
-        writeLog('update', 'user', $id, "更新用户: $username");
+        writeLog('update', 'user', $id, "更新用户: {$data['username']}");
         jsonResponse(200, '用户更新成功');
         break;
 

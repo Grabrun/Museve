@@ -13,8 +13,23 @@ if (empty($_FILES['file'])) jsonResponse(400, '没有上传文件');
 $file = $_FILES['file'];
 $config = require __DIR__ . '/../../includes/config.php';
 
-// 验证文件类型
+// 验证文件类型（双重校验：客户端 MIME + 服务端 magic bytes）
 $allowedTypes = $config['upload']['allowed_types'];
+$allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+if (!in_array($ext, $allowedExtensions)) {
+    jsonResponse(4002, '文件类型不允许');
+}
+
+// 服务端 MIME 验证（防止客户端伪造）
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$realMime = finfo_file($finfo, $file['tmp_name']);
+finfo_close($finfo);
+if (!in_array($realMime, $allowedTypes)) {
+    jsonResponse(4002, '文件类型不允许');
+}
+
 if (!in_array($file['type'], $allowedTypes)) {
     jsonResponse(4002, '文件类型不允许');
 }
@@ -25,7 +40,6 @@ if ($file['size'] > $config['upload']['max_size']) {
 }
 
 // 随机重命名
-$ext = pathinfo($file['name'], PATHINFO_EXTENSION);
 $newName = bin2hex(random_bytes(16)) . '.' . $ext;
 
 // 按类型分目录

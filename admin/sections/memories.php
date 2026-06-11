@@ -151,12 +151,6 @@ try {
                        class="w-full px-3 py-2.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors">
             </div>
 
-            <div>
-                <label class="text-xs font-medium text-museve-gray mb-1.5 block">内容</label>
-                <textarea name="content" rows="4" placeholder="回忆内容..."
-                          class="w-full px-3 py-2.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors resize-none"></textarea>
-            </div>
-
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" onclick="closeModal('memoryModal')"
                         class="px-4 py-2 text-sm text-museve-gray hover:text-museve-night transition-colors">取消</button>
@@ -183,7 +177,6 @@ function openMemoryModal(data) {
         form.querySelector('[name=title]').value = data.title || '';
         form.querySelector('[name=event_time]').value = (data.event_time || '').replace(' ', 'T').substring(0, 16);
         form.querySelector('[name=image]').value = data.image || '';
-        form.querySelector('[name=content]').value = data.content || '';
     } else {
         title.textContent = '新增回忆';
         form.querySelector('[name=event_time]').value = new Date().toISOString().slice(0, 16);
@@ -199,7 +192,6 @@ async function saveMemory() {
         title: form.querySelector('[name=title]').value.trim(),
         event_time: form.querySelector('[name=event_time]').value,
         image: form.querySelector('[name=image]').value.trim(),
-        content: form.querySelector('[name=content]').value.trim(),
     };
 
     if (!data.title) { showToast('请输入标题', 'error'); return; }

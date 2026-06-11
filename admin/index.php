@@ -14,13 +14,16 @@ function isAdminLoggedIn(): bool {
     if (!empty($_SESSION['admin_id'])) {
         return true;
     }
-    if (!empty($_COOKIE['admin_token'])) {
+    if (!empty($_COOKIE['museve_token'])) {
         $db = getDB();
-        $stmt = $db->prepare("SELECT id FROM users WHERE cookie_token = ? AND token_expires > NOW() AND role = 'admin'");
-        $stmt->execute([$_COOKIE['admin_token']]);
+        $stmt = $db->prepare("SELECT id, account, username, role FROM users WHERE cookie_token = ? AND token_expires > NOW()");
+        $stmt->execute([$_COOKIE['museve_token']]);
         $user = $stmt->fetch();
         if ($user) {
             $_SESSION['admin_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['admin_account'] = $user['account'];
+            $_SESSION['admin_role'] = $user['role'];
             return true;
         }
     }
@@ -29,26 +32,12 @@ function isAdminLoggedIn(): bool {
 
 // /admin/login 路由 — 不需要登录
 if ($path === '/admin/login') {
-    $isApi = false;
-    // 如果是 POST 提交到 login 页面自身
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $apiFile = __DIR__ . '/api/auth.php';
-        if (file_exists($apiFile)) {
-            require $apiFile;
-            exit;
-        }
-    }
     // 已登录则跳转
     if (isAdminLoggedIn()) {
         header('Location: /admin');
         exit;
     }
     $loginPage = __DIR__ . '/login.php';
-    if ($isPjax) {
-        header('Content-Type: text/html; charset=utf-8');
-        require $loginPage;
-        exit;
-    }
     header('Content-Type: text/html; charset=utf-8');
     require $loginPage;
     exit;
@@ -87,8 +76,16 @@ $adminRoutes = [
 $content = null;
 $matched = false;
 
+// 精确路由
 if (isset($adminRoutes[$path])) {
     $content = __DIR__ . '/' . $adminRoutes[$path];
+    $matched = true;
+}
+
+// /admin/articles/edit 和 /admin/articles/edit/{id}
+if (!$matched && preg_match('#^/admin/articles/edit(?:/(\d+))?$#', $path, $m)) {
+    if (!empty($m[1])) $_GET['id'] = $m[1];
+    $content = __DIR__ . '/sections/article-edit.php';
     $matched = true;
 }
 
@@ -102,7 +99,6 @@ if ($isPjax && $matched && file_exists($content)) {
 // 完整页面
 if ($matched && file_exists($content)) {
     header('Content-Type: text/html; charset=utf-8');
-    // 后台使用自己的布局（可扩展 admin/head.php + admin/foot.php）
     require $content;
     exit;
 }

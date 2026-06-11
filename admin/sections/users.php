@@ -1,7 +1,7 @@
 <?php
 // 后台 - 用户管理
 $db = getDB();
-$currentUser = $_SESSION['user'] ?? [];
+$currentUser = ['id' => $_SESSION['admin_id'] ?? 0];
 
 // 默认值
 $users = [];
@@ -41,7 +41,7 @@ $roleColors = ['admin' => 'bg-[#DDB8B8]/20 text-[#DDB8B8]', 'author' => 'bg-[#A8
                 <td class="px-5 py-3 text-sm text-[#8E827F]"><?= htmlspecialchars($user['created_at']) ?></td>
                 <td class="px-5 py-3 text-sm text-[#8E827F]"><?= htmlspecialchars($user['last_login'] ?? '从未') ?></td>
                 <td class="px-5 py-3">
-                    <?php if (($user['id'] ?? 0) !== ($currentUser['id'] ?? -1)): ?>
+                    <?php if ($user['id'] !== $currentUser['id']): ?>
                     <button class="text-[#D18B8B] hover:text-[#3E3640]" onclick="deleteItem('users', <?= $user['id'] ?>)">🗑️</button>
                     <?php endif; ?>
                 </td>
@@ -90,7 +90,7 @@ document.getElementById('addUserForm').addEventListener('submit', async (e) => {
     const data = Object.fromEntries(form);
     const res = await fetch('/admin/api/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: csrfHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(data)
     });
     const result = await res.json();

@@ -113,6 +113,7 @@ $pageTitle = $isEdit ? '编辑文章' : '新增文章';
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 <!-- TinyMCE -->
 <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+<script src="/resources/js/admin.js"></script>
 
 <script>
 // TinyMCE 初始化

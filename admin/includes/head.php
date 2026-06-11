@@ -124,7 +124,7 @@ $menuItems = [
             <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-museve-night p-1">
                 <i class="ph ph-list text-xl"></i>
             </button>
-            <div class="text-sm text-museve-gray">欢迎回来，<?= htmlspecialchars($_SESSION['username'] ?? '管理员') ?></div>
+            <div class="text-sm text-museve-gray">欢迎回来，<?= htmlspecialchars($_SESSION['username'] ?? $_SESSION['admin_account'] ?? '管理员') ?></div>
         </div>
         <div class="flex items-center gap-3">
             <span class="text-xs text-museve-gray/60"><?= date('Y-m-d H:i') ?></span>
