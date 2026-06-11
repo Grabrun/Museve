@@ -1,5 +1,6 @@
 <?php
 // 后台公共头部
+require_once __DIR__ . '/../api/auth_helper.php';
 $adminTitle = $siteTitle ?? '暮想管理后台';
 $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 

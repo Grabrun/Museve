@@ -112,29 +112,27 @@ if (!$matched && preg_match('#^/admin/articles/edit(?:/(\d+))?$#', $path, $m)) {
     $matched = true;
 }
 
-// 渲染页面（注入 CSRF Token meta + 公共脚本）
+// 渲染页面
 if ($matched && file_exists($content)) {
-    $csrfToken = '';
+    // 确保 CSRF Token 已生成（head.php 需要）
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
-    $csrfToken = $_SESSION['csrf_token'];
 
     header('Content-Type: text/html; charset=utf-8');
     
     // Pjax 请求：仅返回内容片段
     if ($isPjax) {
-        // 注入 csrf meta 到内容前
-        echo '<meta name="csrf-token" content="' . $csrfToken . '">';
+        echo '<meta name="csrf-token" content="' . $_SESSION['csrf_token'] . '">';
         require $content;
         exit;
     }
     
-    // 完整页面：注入最小化 head
-    echo '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="' . $csrfToken . '"><link rel="icon" href="/resources/images/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"><script src="https://unpkg.com/@phosphor-icons/web"><' . '/script><script src="https://cdn.tailwindcss.com">' . '<' . '/script><script>tailwind.config={theme:{extend:{colors:{"museve-bg":"#F9F7F4","museve-haze":"#F5F2F0","museve-rose":"#DDB8B8","museve-rose-deep":"#B28B8B","museve-blue":"#A8C5DA","museve-night":"#3E3640","museve-gray":"#8E827F","museve-green":"#87A878","museve-orange":"#E0A96D","museve-red":"#D18B8B","museve-ash":"#9BADB7"},fontFamily:{serif:["Noto Serif SC","serif"],sans:["Inter","system-ui","sans-serif"]}}}}<' . '/script><link rel="stylesheet" href="/resources/css/admin.css"><script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"><' . '/script><script src="/resources/js/admin.js"><' . '/script></head><body>';
+    // 完整页面：使用后台布局（侧边栏 + 顶部栏 + 内容区）
+    require __DIR__ . '/includes/head.php';
     require $content;
-    echo '</body></html>';
+    require __DIR__ . '/includes/foot.php';
     exit;
 }
 
