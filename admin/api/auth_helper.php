@@ -56,6 +56,16 @@ function verifyCsrfToken(): void {
  */
 function checkLoginLock(string $ip): bool {
     $db = getDB();
+    // 确保表存在（首次使用前创建）
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS `login_attempts` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `ip` VARCHAR(45) NOT NULL,
+            `account` VARCHAR(50) NOT NULL,
+            `attempted_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_ip_time` (`ip`, `attempted_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
     $stmt = $db->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip = ? AND attempted_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
     $stmt->execute([$ip]);
     return $stmt->fetchColumn() >= 5;
