@@ -238,20 +238,46 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// 状态选择交互 — 使用预定义 CSS 避免 CDN Tailwind 动态类问题
-const styleSelected = document.createElement('style');
-styleSelected.textContent = '.status-selected { border-width: 2px !important; } .status-unselected { border: 1px solid transparent !important; }';
-document.head.appendChild(styleSelected);
+// 状态选择交互 — 完全使用内联样式，绕过 CDN Tailwind 动态类问题
+const statusStyles = {
+    draft: { bg: '#F5F2F0', border: '#8E827F' },
+    published: { bg: '#87A878', border: '#87A878' },
+    pending: { bg: '#E0A96D', border: '#E0A96D' },
+};
 
 document.querySelectorAll('input[name="status"]').forEach(radio => {
     radio.addEventListener('change', () => {
         document.querySelectorAll('input[name="status"]').forEach(r => {
             const label = r.closest('label');
-            label.classList.remove('status-selected', 'border-museve-green', 'border-museve-gray', 'border-museve-orange', 'bg-museve-green/10', 'bg-museve-haze', 'bg-museve-orange/10');
+            const icon = label.querySelector('i');
+            const span = label.querySelector('span');
+            const checkIcon = label.querySelector('.ph-check');
+            
+            // Reset
+            label.style.border = '1px solid transparent';
+            label.style.background = '';
+            if (checkIcon) checkIcon.style.display = 'none';
+            
             if (r.checked) {
-                var colorMap = { draft: 'border-museve-gray', published: 'border-museve-green', pending: 'border-museve-orange' };
-                var bgMap = { draft: 'bg-museve-haze', published: 'bg-museve-green/10', pending: 'bg-museve-orange/10' };
-                label.classList.add('status-selected', colorMap[r.value], bgMap[r.value]);
+                const s = statusStyles[r.value];
+                label.style.border = '2px solid ' + s.border;
+                label.style.background = s.bg + '1A'; // 10% opacity hex
+                // Update icon and text colors
+                if (icon) icon.style.color = s.border;
+                if (span) { span.style.color = s.border; span.style.fontWeight = '500'; }
+                // Show check
+                if (!checkIcon) {
+                    const newCheck = document.createElement('i');
+                    newCheck.className = 'ph ph-check text-sm ml-auto';
+                    newCheck.style.color = s.border;
+                    label.appendChild(newCheck);
+                } else {
+                    checkIcon.style.display = '';
+                    checkIcon.style.color = s.border;
+                }
+            } else {
+                if (icon) icon.style.color = '';
+                if (span) { span.style.color = ''; span.style.fontWeight = ''; }
             }
         });
     });
