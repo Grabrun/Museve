@@ -22,12 +22,14 @@ if (!in_array($ext, $allowedExtensions)) {
     jsonResponse(4002, '文件类型不允许');
 }
 
-// 服务端 MIME 验证（防止客户端伪造）
-$finfo = finfo_open(FILEINFO_MIME_TYPE);
-$realMime = finfo_file($finfo, $file['tmp_name']);
-finfo_close($finfo);
-if (!in_array($realMime, $allowedTypes)) {
-    jsonResponse(4002, '文件类型不允许');
+// 服务端 MIME 验证（防止客户端伪造，需 PHP fileinfo 支持）
+if (function_exists('finfo_open')) {
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $realMime = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    if (!in_array($realMime, $allowedTypes)) {
+        jsonResponse(4002, '文件类型不允许');
+    }
 }
 
 if (!in_array($file['type'], $allowedTypes)) {
