@@ -10,6 +10,13 @@ $db = getDB();
 // 非 GET 请求验证 CSRF
 if ($method !== 'GET') verifyCsrfToken();
 
+// 从 URL 路径解析 ID
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$urlId = 0;
+if (preg_match('/admin\/api\/users\/(\d+)/', $path, $m)) {
+    $urlId = (int)$m[1];
+}
+
 switch ($method) {
     case 'GET':
         $page = max(1, intval($_GET['page'] ?? 1));
@@ -87,7 +94,7 @@ switch ($method) {
 
     case 'DELETE':
         $data = json_decode(file_get_contents('php://input'), true);
-        $id = intval($data['id'] ?? $_GET['id'] ?? 0);
+        $id = $urlId ?: intval($data['id'] ?? $_GET['id'] ?? 0);
         if (!$id) jsonResponse(400, '缺少用户 ID');
         if ($id == $currentUser['id']) jsonResponse(403, '不能删除自己');
 

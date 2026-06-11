@@ -59,11 +59,17 @@ switch ($method) {
         $content = trim($body['content'] ?? '');
         if (empty($content)) jsonResponse(400, '内容不能为空');
 
-        $stmt = $db->prepare("INSERT INTO whispers (content, author_id, created_at) VALUES (:content, :author_id, NOW())");
-        $stmt->execute([
-            ':content' => $content,
-            ':author_id' => $user['id'],
-        ]);
+        $createdAt = $body['created_at'] ?? null;
+        if ($createdAt && !strtotime($createdAt)) $createdAt = null;
+        
+        $sql = $createdAt 
+            ? "INSERT INTO whispers (content, author_id, created_at) VALUES (:content, :author_id, :created_at)"
+            : "INSERT INTO whispers (content, author_id, created_at) VALUES (:content, :author_id, NOW())";
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':content', $content);
+        $stmt->bindValue(':author_id', $user['id']);
+        if ($createdAt) $stmt->bindValue(':created_at', $createdAt);
+        $stmt->execute();
 
         $newId = (int)$db->lastInsertId();
         writeLog('create', 'whisper', $newId, '创建悄悄话');
@@ -76,8 +82,20 @@ switch ($method) {
         $content = trim($body['content'] ?? '');
         if (empty($content)) jsonResponse(400, '内容不能为空');
 
-        $sql = "UPDATE whispers SET content = :content, updated_at = NOW() WHERE id = :id" . $authorFilter;
-        $params = array_merge([':content' => $content, ':id' => $id], $authorParams);
+        $fields = ['content = :content'];
+        $params = [':content' => $content];
+        
+        $createdAt = $body['created_at'] ?? null;
+        if ($createdAt && strtotime($createdAt)) {
+            $fields[] = 'created_at = :created_at';
+            $params[':created_at'] = $createdAt;
+        }
+        
+        $fields[] = 'updated_at = NOW()';
+        $params[':id'] = $id;
+        $params = array_merge($params, $authorParams);
+        
+        $sql = "UPDATE whispers SET " . implode(', ', $fields) . " WHERE id = :id" . $authorFilter;
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 

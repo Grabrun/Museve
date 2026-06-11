@@ -242,7 +242,7 @@ function openMemoryModal(data) {
         }
     } else {
         title.textContent = '新增回忆';
-        form.querySelector('[name=event_time]').value = new Date().toISOString().slice(0, 16);
+        form.querySelector('[name=event_time]').value = new Date().toLocaleString('sv-SE').slice(0, 16);
     }
 
     openModal('memoryModal');

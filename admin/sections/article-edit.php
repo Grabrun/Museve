@@ -120,13 +120,14 @@ $pageTitle = $isEdit ? '编辑文章' : '新增文章';
 tinymce.init({
     selector: '#article-editor',
     height: 500,
+    min_height: 300,
     max_width: 900,
     skin: 'oxide-dark',
     toolbar_mode: 'wrap',
+    toolbar_sticky: true,
     mobile: {
-        theme: 'mobile',
-        toolbar: 'undo redo | bold italic | bullist numlist | link image | fullscreen',
-        plugins: 'lists link image fullscreen'
+        toolbar_mode: 'scrolling',
+        toolbar: 'undo redo | bold italic | bullist numlist'
     },
     content_css: 'default',
     content_style: 'body { font-family: "Noto Serif SC", "Source Han Serif SC", serif; color: #3E3640; line-height: 1.8; font-size: 1.125rem; padding: 1rem 2rem; } p { margin-bottom: 1em; } blockquote { border-left: 3px solid #DDB8B8; padding-left: 1rem; margin: 1em 0; background: #F9F7F4; border-radius: 0 8px 8px 0; padding: 0.75rem 1rem; } pre { background: #F5F2F0; border-radius: 8px; padding: 1rem; overflow-x: auto; } code { background: #F5F2F0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }',
@@ -237,24 +238,20 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// 状态选择交互 — 使用静态类名避免 CDN Tailwind 动态类问题
-const statusColors = { draft: 'border-museve-gray bg-museve-haze', published: 'border-museve-green bg-museve-green/10', pending: 'border-museve-orange bg-museve-orange/10' };
-const statusIcons = { draft: 'ph-pencil-simple text-museve-gray', published: 'ph-check-circle text-museve-green', pending: 'ph-clock text-museve-orange' };
+// 状态选择交互 — 使用预定义 CSS 避免 CDN Tailwind 动态类问题
+const styleSelected = document.createElement('style');
+styleSelected.textContent = '.status-selected { border-width: 2px !important; } .status-unselected { border: 1px solid transparent !important; }';
+document.head.appendChild(styleSelected);
 
 document.querySelectorAll('input[name="status"]').forEach(radio => {
     radio.addEventListener('change', () => {
         document.querySelectorAll('input[name="status"]').forEach(r => {
             const label = r.closest('label');
-            const icon = label.querySelector('i');
-            label.className = label.className.replace(/bg-\S+|border-\S+|text-\S+/g, '');
+            label.classList.remove('status-selected', 'border-museve-green', 'border-museve-gray', 'border-museve-orange', 'bg-museve-green/10', 'bg-museve-haze', 'bg-museve-orange/10');
             if (r.checked) {
-                label.classList.add('border-2', ...statusColors[r.value].split(' '));
-                if (icon && statusIcons[r.value]) {
-                    icon.className = icon.className.replace(/text-\S+/g, '');
-                    icon.className += ' ' + statusIcons[r.value];
-                }
-            } else {
-                label.classList.add('border', 'border-transparent');
+                var colorMap = { draft: 'border-museve-gray', published: 'border-museve-green', pending: 'border-museve-orange' };
+                var bgMap = { draft: 'bg-museve-haze', published: 'bg-museve-green/10', pending: 'bg-museve-orange/10' };
+                label.classList.add('status-selected', colorMap[r.value], bgMap[r.value]);
             }
         });
     });

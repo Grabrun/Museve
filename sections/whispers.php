@@ -132,10 +132,10 @@ $bubbleColors = [
                 $bg = $bubbleColors[$idx % count($bubbleColors)];
             ?>
             <div class="whisper-item flex gap-3">
-                <img src="<?= htmlspecialchars($whisper['avatar'] ?: DEFAULT_AVATAR) ?>"
+                <img src="<?= htmlspecialchars($whisper['avatar'] ?: '/resources/images/default-avatar.png') ?>"
                      alt="头像"
                      class="whisper-avatar"
-                     onerror="this.src='<?= DEFAULT_AVATAR ?>'">
+                     onerror="this.src='/resources/images/default-avatar.png'">
                 <div class="flex-1 min-w-0">
                     <div class="whisper-bubble" style="background: <?= $bg ?>; border-color: <?= str_replace(',0.15)', ',0.3)', str_replace(',0.12)', ',0.25)', $bg)) ?>">
                         <p class="whisper-name"><?= htmlspecialchars($whisper['username'] ?? '匿名') ?></p>

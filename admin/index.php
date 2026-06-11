@@ -12,7 +12,20 @@ $isPjax = !empty($_SERVER['HTTP_X_PJAX']);
 // 检查登录状态
 function isAdminLoggedIn(): bool {
     if (!empty($_SESSION['admin_id'])) {
-        return true;
+        // 即使 session 存在，也要验证 cookie token 是否过期
+        if (!empty($_COOKIE['museve_token'])) {
+            $db = getDB();
+            $stmt = $db->prepare("SELECT id, account, username, role FROM users WHERE cookie_token = ? AND token_expires > NOW()");
+            $stmt->execute([$_COOKIE['museve_token']]);
+            $user = $stmt->fetch();
+            if ($user) {
+                $_SESSION['username'] = $user['username'];
+                return true;
+            }
+        }
+        // token 已过期，清除 session 强制重新登录
+        session_destroy();
+        return false;
     }
     if (!empty($_COOKIE['museve_token'])) {
         $db = getDB();

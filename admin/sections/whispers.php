@@ -123,10 +123,19 @@ try {
         <form id="whisperForm" class="p-6 space-y-4" onsubmit="return false;">
             <input type="hidden" name="id" value="">
             <div>
+                <label class="text-xs font-medium text-museve-gray mb-1.5 block">署名</label>
+                <input type="text" name="username" placeholder="悄悄话署名..."
+                       class="w-full px-3 py-2.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors">
+            </div>
+            <div>
                 <label class="text-xs font-medium text-museve-gray mb-1.5 block">内容</label>
-                <textarea name="content" rows="5" placeholder="悄悄话内容..."
+                <textarea name="content" rows="4" placeholder="悄悄话内容..."
                           class="w-full px-3 py-2.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors resize-none font-serif"></textarea>
             </div>
+            <div>
+                <label class="text-xs font-medium text-museve-gray mb-1.5 block">时间</label>
+                <input type="datetime-local" name="created_at"
+                       class="w-full px-3 py-2.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors">
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" onclick="closeModal('whisperModal')"
                         class="px-4 py-2 text-sm text-museve-gray hover:text-museve-night transition-colors">取消</button>
@@ -153,6 +162,7 @@ function openWhisperCreateModal() {
     const form = document.getElementById('whisperForm');
     form.reset();
     form.querySelector('[name=id]').value = '';
+    form.querySelector('[name=created_at]').value = new Date().toISOString().slice(0, 16);
     document.querySelector('#whisperModal h2').textContent = '新增悄悄话';
     openModal('whisperModal');
 }
@@ -161,7 +171,10 @@ function openWhisperModal(data) {
     const form = document.getElementById('whisperForm');
     form.reset();
     form.querySelector('[name=id]').value = data.id;
+    form.querySelector('[name=username]').value = data.username || (data.author_name || '');
     form.querySelector('[name=content]').value = data.content || '';
+    const dt = (data.created_at || '').replace(' ', 'T').substring(0, 16);
+    form.querySelector('[name=created_at]').value = dt;
     document.querySelector('#whisperModal h2').textContent = '编辑悄悄话';
     openModal('whisperModal');
 }
@@ -170,12 +183,14 @@ async function saveWhisper() {
     const form = document.getElementById('whisperForm');
     const id = form.querySelector('[name=id]').value;
     const content = form.querySelector('[name=content]').value.trim();
+    const created_at = form.querySelector('[name=created_at]').value;
 
     if (!content) { showToast('请输入内容', 'error'); return; }
 
     const isCreate = !id;
     const url = isCreate ? '/admin/api/whispers' : '/admin/api/whispers/' + id;
     const body = { content: content };
+    if (created_at) body.created_at = created_at;
     if (!isCreate) body._method = 'PUT';
 
     try {
