@@ -1,6 +1,5 @@
 <?php
 // 404 页面 Section
-http_response_code(404);
 ?>
 
 <section class="min-h-[70vh] flex flex-col items-center justify-center px-4 py-20">

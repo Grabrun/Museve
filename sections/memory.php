@@ -9,7 +9,6 @@ $pdo = getDB();
 $id = getRouteId();
 
 if (!$id) {
-    http_response_code(404);
     require __DIR__ . '/404.php';
     exit;
 }
@@ -26,7 +25,6 @@ try {
     $memory = $stmt->fetch();
 
     if (!$memory) {
-        http_response_code(404);
         require __DIR__ . '/404.php';
         exit;
     }

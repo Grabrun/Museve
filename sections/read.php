@@ -6,7 +6,6 @@ $pdo = getDB();
 $id = getRouteId();
 
 if (!$id) {
-    http_response_code(404);
     if (file_exists(__DIR__ . '/404.php')) require __DIR__ . '/404.php';
     exit;
 }
@@ -17,7 +16,6 @@ $stmt->execute();
 $article = $stmt->fetch();
 
 if (!$article) {
-    http_response_code(404);
     if (file_exists(__DIR__ . '/404.php')) require __DIR__ . '/404.php';
     exit;
 }

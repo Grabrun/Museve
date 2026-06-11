@@ -20,25 +20,42 @@ $routes = [
 
 $content = null;
 $matched = false;
+$notFound = false;
 
 // 精确路由
-if (isset($routes[$path])) {
+if (isset($routes[$path]) && file_exists(__DIR__ . '/' . $routes[$path])) {
     $content = __DIR__ . '/' . $routes[$path];
     $matched = true;
 }
 
 // /memory/{id}
 if (!$matched && preg_match('#^/memory/(\d+)$#', $path, $m)) {
-    $_GET['id'] = $m[1];
-    $content = __DIR__ . '/sections/memory.php';
-    $matched = true;
+    $memId = (int)$m[1];
+    // 预检查记忆是否存在
+    $stmt = getDB()->prepare("SELECT COUNT(*) FROM memories WHERE id = ?");
+    $stmt->execute([$memId]);
+    if ($stmt->fetchColumn() > 0) {
+        $_GET['id'] = $memId;
+        $content = __DIR__ . '/sections/memory.php';
+        $matched = true;
+    } else {
+        $notFound = true;
+    }
 }
 
 // /read/{id}
 if (!$matched && preg_match('#^/read/(\d+)$#', $path, $m)) {
-    $_GET['id'] = $m[1];
-    $content = __DIR__ . '/sections/read.php';
-    $matched = true;
+    $readId = (int)$m[1];
+    // 预检查文章是否存在且已发布
+    $stmt = getDB()->prepare("SELECT COUNT(*) FROM articles WHERE id = ? AND status = 'published'");
+    $stmt->execute([$readId]);
+    if ($stmt->fetchColumn() > 0) {
+        $_GET['id'] = $readId;
+        $content = __DIR__ . '/sections/read.php';
+        $matched = true;
+    } else {
+        $notFound = true;
+    }
 }
 
 // /sitemap.xml
@@ -55,37 +72,41 @@ if ($path === '/robots.txt') {
 }
 
 // /api/*
-if (!$matched && preg_match('#^/api/(.+)$#', $path, $m)) {
+if (!$matched && !$notFound && preg_match('#^/api/(.+)$#', $path, $m)) {
     $apiFile = __DIR__ . '/api/' . basename($m[1]) . '.php';
     if (file_exists($apiFile)) {
         require $apiFile;
         exit;
     }
+    $notFound = true;
+}
+
+// 404 处理（头部设置必须在任何输出之前）
+if ($notFound || !$matched || !$content || !file_exists($content)) {
+    $content = __DIR__ . '/sections/404.php';
+    $is404 = true;
+} else {
+    $is404 = false;
 }
 
 // Pjax 请求
-if ($isPjax && $matched && file_exists($content)) {
+if ($isPjax && !$is404 && file_exists($content)) {
+    header('Content-Type: text/html; charset=utf-8');
+    require $content;
+    exit;
+}
+if ($isPjax && $is404) {
+    http_response_code(404);
     header('Content-Type: text/html; charset=utf-8');
     require $content;
     exit;
 }
 
 // 完整页面
-if ($matched && file_exists($content)) {
-    header('Content-Type: text/html; charset=utf-8');
-    require __DIR__ . '/includes/head.php';
-    require $content;
-    require __DIR__ . '/includes/foot.php';
-    exit;
-}
-
-// 404
-http_response_code(404);
 header('Content-Type: text/html; charset=utf-8');
-if ($isPjax) {
-    echo '<div class="text-center py-20"><h1 class="text-4xl font-bold mb-4">404</h1><p class="text-[#B8A9B0]">页面走丢了…</p></div>';
-    exit;
+if ($is404) {
+    http_response_code(404);
 }
 require __DIR__ . '/includes/head.php';
-echo '<div class="text-center py-20"><h1 class="text-4xl font-bold mb-4">404</h1><p class="text-[#B8A9B0]">页面走丢了…</p></div>';
+require $content;
 require __DIR__ . '/includes/foot.php';
