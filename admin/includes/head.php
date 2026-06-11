@@ -7,7 +7,7 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $menuItems = [
     '/admin' => ['icon' => 'ph-chart-pie-slice', 'label' => '仪表盘'],
     '/admin/memories' => ['icon' => 'ph-clock-counter-clockwise', 'label' => '回忆管理'],
-    '/admin/whispers' => ['icon' => 'ph-chat-circle-dots', 'label' => '悄悄话'],
+    '/admin/whispers' => ['icon' => 'ph-chat-circle-dots', 'label' => '悄悄话管理'],
     '/admin/articles' => ['icon' => 'ph-article', 'label' => '文章管理'],
     '/admin/users' => ['icon' => 'ph-users', 'label' => '用户管理'],
     '/admin/settings' => ['icon' => 'ph-gear-six', 'label' => '网站设置'],

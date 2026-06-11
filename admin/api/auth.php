@@ -28,7 +28,7 @@ if ($action === 'logout' && $method === 'POST') {
 
 // 登录
 if ($method === 'POST' && $action === '') {
-    $body = json_decode(file_get_contents('php://input'), true);
+    $body = getJsonBody();
     $account = trim($body['account'] ?? '');
     $password = $body['password'] ?? '';
 

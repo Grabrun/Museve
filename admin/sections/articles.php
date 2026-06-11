@@ -72,8 +72,16 @@ $statusLabels = ['draft'=>'草稿','published'=>'已发布','pending'=>'待审�
                 <td class="px-5 py-3 text-sm text-[#8E827F]"><?= htmlspecialchars($item['author_name'] ?? '') ?></td>
                 <td class="px-5 py-3 text-sm text-[#8E827F]"><?= htmlspecialchars($item['created_at']) ?></td>
                 <td class="px-5 py-3">
-                    <a href="/admin/articles/edit/<?= $item['id'] ?>" class="text-[#A8C5DA] hover:text-[#3E3640] mr-2">✏️</a>
-                    <button class="text-[#D18B8B] hover:text-[#3E3640]" onclick="deleteItem('articles', <?= $item['id'] ?>)">🗑️</button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="location.href='/admin/articles/edit/<?= $item['id'] ?>'"
+                                class="w-8 h-8 rounded-full flex items-center justify-center text-museve-blue hover:bg-museve-blue/10 transition-colors" title="编辑">
+                            <i class="ph ph-pencil-simple text-sm"></i>
+                        </button>
+                        <button onclick="deleteItem('articles', <?= $item['id'] ?>)"
+                                class="w-8 h-8 rounded-full flex items-center justify-center text-museve-red hover:bg-museve-red/10 transition-colors" title="删除">
+                            <i class="ph ph-trash text-sm"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; endif; ?>

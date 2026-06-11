@@ -34,7 +34,7 @@ switch ($method) {
         break;
 
     case 'POST':
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonBody();
         $account = trim($data['account'] ?? '');
         $username = trim($data['username'] ?? '');
         $password = $data['password'] ?? '';
@@ -60,7 +60,7 @@ switch ($method) {
         break;
 
     case 'PUT':
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonBody();
         $id = intval($data['id'] ?? 0);
         if (!$id) jsonResponse(400, '缺少用户 ID');
 
@@ -93,7 +93,7 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonBody();
         $id = $urlId ?: intval($data['id'] ?? $_GET['id'] ?? 0);
         if (!$id) jsonResponse(400, '缺少用户 ID');
         if ($id == $currentUser['id']) jsonResponse(403, '不能删除自己');

@@ -83,6 +83,79 @@ try {
                    placeholder="粤ICP备XXXXXXXX号"
                    class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
         </div>
+        <div class="mt-4">
+            <label class="text-sm text-[#8E827F]">版权信息</label>
+            <input type="text" name="copyright" value="<?= htmlspecialchars($settings['copyright'] ?? '') ?>"
+                   placeholder="© 2026 暮想 Museve"
+                   class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+        </div>
+    </div>
+
+    <!-- SEO 设置 -->
+    <div class="bg-white rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-[#3E3640] mb-4">SEO 设置</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="text-sm text-[#8E827F]">站点描述 (meta description)</label>
+                <textarea name="site_description" rows="2"
+                          placeholder="网站描述，用于搜索引擎展示"
+                          class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input resize-none"><?= htmlspecialchars($settings['site_description'] ?? '') ?></textarea>
+            </div>
+            <div>
+                <label class="text-sm text-[#8E827F]">关键词 (meta keywords)</label>
+                <input type="text" name="site_keywords" value="<?= htmlspecialchars($settings['site_keywords'] ?? '') ?>"
+                       placeholder="暮想, Museve, 回忆, 悄悄话, 文章"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+        </div>
+    </div>
+
+    <!-- 社交链接 -->
+    <div class="bg-white rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-[#3E3640] mb-4">社交链接</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="text-sm text-[#8E827F]">GitHub</label>
+                <input type="url" name="social_github" value="<?= htmlspecialchars($settings['social_github'] ?? '') ?>"
+                       placeholder="https://github.com/username"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+            <div>
+                <label class="text-sm text-[#8E827F]">微博</label>
+                <input type="text" name="social_weibo" value="<?= htmlspecialchars($settings['social_weibo'] ?? '') ?>"
+                       placeholder="微博用户名"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+            <div>
+                <label class="text-sm text-[#8E827F]">Twitter / X</label>
+                <input type="text" name="social_twitter" value="<?= htmlspecialchars($settings['social_twitter'] ?? '') ?>"
+                       placeholder="@username"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+            <div>
+                <label class="text-sm text-[#8E827F]">联系邮箱</label>
+                <input type="email" name="contact_email" value="<?= htmlspecialchars($settings['contact_email'] ?? '') ?>"
+                       placeholder="hello@example.com"
+                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚设置 -->
+    <div class="bg-white rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-[#3E3640] mb-4">页脚设置</h2>
+        <div>
+            <label class="text-sm text-[#8E827F]">自定义页脚 HTML</label>
+            <textarea name="custom_footer" rows="3"
+                      placeholder="页脚额外内容（支持 HTML）"
+                      class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input font-mono resize-none"><?= htmlspecialchars($settings['custom_footer'] ?? '') ?></textarea>
+        </div>
+        <div class="mt-4">
+            <label class="text-sm text-[#8E827F]">公告（首页显示）</label>
+            <textarea name="announcement" rows="2"
+                      placeholder="站点公告内容"
+                      class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input resize-none"><?= htmlspecialchars($settings['announcement'] ?? '') ?></textarea>
+        </div>
     </div>
 
     <!-- 引语设置 -->

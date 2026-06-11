@@ -121,6 +121,8 @@ const TABLE_DEFINITIONS = [
 const DEFAULT_SETTINGS = [
     'site_title'    => '暮想',
     'site_subtitle' => '在薄暮时分，温柔地想起。',
+    'site_description' => '',
+    'site_keywords' => '暮想, Museve, 回忆, 悄悄话, 文章',
     'site_avatar'   => '/resources/images/default-avatar.png',
     'site_logo'     => '/resources/images/logo.svg',
     'quote_1'       => '时光会走远，记忆会永恒。',
@@ -128,6 +130,12 @@ const DEFAULT_SETTINGS = [
     'quote_3'       => '在薄暮时分，想起那些温暖的瞬间。',
     'icp_number'    => '',
     'copyright'     => '© 2026 暮想 Museve',
+    'social_github' => '',
+    'social_weibo'  => '',
+    'social_twitter' => '',
+    'contact_email' => '',
+    'custom_footer' => '',
+    'announcement'  => '',
 ];
 
 // ============================================================
@@ -163,14 +171,17 @@ function getMethod(): string {
 }
 
 /**
- * 获取 JSON 请求体并解码为数组
+ * 获取 JSON 请求体并解码为数组（缓存读取，防止多次调用 php://input）
  *
  * @return array 解码后的关联数组，失败时返回空数组
  */
 function getJsonBody(): array {
+    static $cached = null;
+    if ($cached !== null) return $cached;
     $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
-    return is_array($data) ? $data : [];
+    $cached = is_array($data) ? $data : [];
+    return $cached;
 }
 
 /**

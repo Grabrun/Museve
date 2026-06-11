@@ -21,7 +21,7 @@ switch ($method) {
         break;
 
     case 'PUT':
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = getJsonBody();
         if (empty($data)) jsonResponse(400, '没有需要更新的数据');
 
         $stmt = $db->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)");

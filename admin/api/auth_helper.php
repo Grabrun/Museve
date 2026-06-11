@@ -10,8 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $override = $_POST['_method'] ?? null;
     // 再检查 JSON body 中的 _method (PUT 使用)
     if (!$override) {
-        $rawBody = file_get_contents('php://input');
-        $body = json_decode($rawBody, true);
+        $body = getJsonBody();
         $override = $body['_method'] ?? null;
     }
     if ($override && in_array(strtoupper($override), ['PUT', 'DELETE'])) {

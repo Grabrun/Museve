@@ -155,7 +155,8 @@ try {
                     </div>
                     <input type="file" id="memoryCoverInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
                 </div>
-                <input type="hidden" name="image" id="memoryImageUrl" value="">
+                <input type="text" name="image" id="memoryImageUrl" value="" placeholder="图片URL或点击上方上传..."
+                       class="w-full mt-2 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors">
                 <p class="text-[10px] text-museve-gray/50 mt-2">支持 JPG/PNG/WebP，建议 16:9</p>
             </div>
 
