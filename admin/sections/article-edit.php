@@ -97,11 +97,11 @@ $pageTitle = $isEdit ? '编辑文章' : '新增文章';
             <span>Ctrl+S 保存草稿</span>
         </div>
         <div class="flex gap-3">
-            <button type="button" onclick="saveArticle('draft')"
+            <button type="button" onclick="saveArticle()"
                     class="px-5 py-2 bg-museve-haze text-museve-night rounded-lg text-sm hover:bg-[#E5E0DB] transition-colors">
-                <i class="ph ph-floppy-disk mr-1"></i> 保存草稿
+                <i class="ph ph-floppy-disk mr-1"></i> 保存
             </button>
-            <button type="button" onclick="saveArticle('published')"
+            <button type="button" onclick="publishArticle()"
                     class="px-5 py-2 bg-museve-rose text-white rounded-lg text-sm hover:bg-museve-rose-deep transition-colors shadow-sm">
                 <i class="ph ph-paper-plane-tilt mr-1"></i> 发布文章
             </button>
@@ -189,8 +189,9 @@ async function uploadCover(file) {
     }
 }
 
-// 保存文章 (带 DOMPurify 过滤)
-async function saveArticle(status) {
+// 保存文章 (按当前选中的状态保存)
+async function saveArticle() {
+    const status = document.querySelector('input[name="status"]:checked')?.value || 'draft';
     const form = document.getElementById('articleForm');
     let content = typeof tinymce !== 'undefined' ? tinymce.get('article-editor').getContent() : form.querySelector('[name=content]').value;
 
@@ -230,13 +231,20 @@ async function saveArticle(status) {
     }
 }
 
-// Ctrl+S 快捷键
+// Ctrl+S 快捷键 — 草稿快速保存
 document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        saveArticle('draft');
+        saveArticle();
     }
 });
+
+// 快速发布（强制 published）
+async function publishArticle() {
+    // 临时选中发布状态
+    document.querySelector('input[name="status"][value="published"]').checked = true;
+    saveArticle();
+}
 
 // 状态选择交互 — 完全使用内联样式，绕过 CDN Tailwind 动态类问题
 const statusStyles = {
