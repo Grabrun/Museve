@@ -46,7 +46,7 @@ switch ($method) {
             $where .= " AND a.title LIKE :search";
             $params[':search'] = "%$search%";
         }
-        if ($status && in_array($status, ['draft','published','pending','archived','deleted'])) {
+        if ($status && in_array($status, ['draft','published','pending','archived'])) {
             $where .= " AND a.status = :status";
             $params[':status'] = $status;
         }
@@ -137,13 +137,13 @@ switch ($method) {
 
     case 'DELETE':
         if (!$id) jsonResponse(400, '缺少 ID');
-        // 软删除：改为 deleted 状态
-        $sql = "UPDATE articles SET status = 'deleted', updated_at = NOW() WHERE id = :id" . $authorFilter;
+        // 永久删除
+        $sql = "DELETE FROM articles WHERE id = :id" . $authorFilter;
         $params = array_merge([':id' => $id], $authorParams);
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
 
-        writeLog('delete', 'article', $id, '软删除文章');
+        writeLog('delete', 'article', $id, '永久删除文章');
         jsonResponse(200, '删除成功');
         break;
 

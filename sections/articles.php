@@ -296,7 +296,7 @@ $totalPages = $total > $per ? (int)ceil($total / $per) : 0;
                 $initial  = mb_substr($author, 0, 1);
                 $dateStr  = date('Y-m-d', strtotime($article['created_at']));
             ?>
-            <a href="/read?id=<?= (int)$article['id'] ?>" class="article-card">
+            <a href="/read/<?= (int)$article['id'] ?>" class="article-card">
                 <!-- 封面 -->
                 <div class="article-card__cover <?= empty($article['cover']) ? 'article-card__cover--empty' : '' ?>">
                     <?php if (!empty($article['cover'])): ?>

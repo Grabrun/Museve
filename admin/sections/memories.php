@@ -147,8 +147,16 @@ try {
 
             <div>
                 <label class="text-xs font-medium text-museve-gray mb-1.5 block">封面图片</label>
-                <input type="text" name="image" placeholder="图片 URL 或上传路径..."
-                       class="w-full px-3 py-2.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors">
+                <div id="memoryCoverDropzone" class="relative border-2 border-dashed border-[#E5E0DB] rounded-xl overflow-hidden transition-colors hover:border-museve-rose/50 cursor-pointer group">
+                    <img id="memoryCoverPreview" src="" class="w-full h-32 object-cover hidden">
+                    <div id="memoryCoverPlaceholder" class="h-32 flex flex-col items-center justify-center text-museve-gray/60">
+                        <i class="ph ph-image text-2xl mb-1 group-hover:text-museve-rose transition-colors"></i>
+                        <span class="text-xs">拖拽或点击上传</span>
+                    </div>
+                    <input type="file" id="memoryCoverInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                </div>
+                <input type="hidden" name="image" id="memoryImageUrl" value="">
+                <p class="text-[10px] text-museve-gray/50 mt-2">支持 JPG/PNG/WebP，建议 16:9</p>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
@@ -164,19 +172,74 @@ try {
 </div>
 
 <script>
+// 图片上传处理
+const memDropzone = document.getElementById('memoryCoverDropzone');
+const memCoverInput = document.getElementById('memoryCoverInput');
+const memCoverPreview = document.getElementById('memoryCoverPreview');
+const memCoverPlaceholder = document.getElementById('memoryCoverPlaceholder');
+const memImageUrl = document.getElementById('memoryImageUrl');
+
+if (memDropzone) {
+    ['dragenter', 'dragover'].forEach(e => {
+        memDropzone.addEventListener(e, (ev) => { ev.preventDefault(); memDropzone.classList.add('border-museve-rose'); });
+    });
+    ['dragleave', 'drop'].forEach(e => {
+        memDropzone.addEventListener(e, (ev) => { ev.preventDefault(); memDropzone.classList.remove('border-museve-rose'); });
+    });
+    memDropzone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file) uploadMemoryCover(file);
+    });
+    memCoverInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) uploadMemoryCover(file);
+    });
+}
+
+async function uploadMemoryCover(file) {
+    if (!file.type.startsWith('image/')) { showToast('请选择图片文件', 'error'); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('图片不能超过 5MB', 'error'); return; }
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+        const res = await fetch('/admin/api/upload', { method: 'POST', body: formData, headers: { 'X-CSRF-Token': getCsrfToken() } });
+        const data = await res.json();
+        if (data.code === 200) {
+            memImageUrl.value = data.data.url;
+            memCoverPreview.src = data.data.url;
+            memCoverPreview.classList.remove('hidden');
+            memCoverPlaceholder.classList.add('hidden');
+            showToast('图片上传成功', 'success');
+        } else {
+            showToast(data.message || '上传失败', 'error');
+        }
+    } catch (e) {
+        showToast('上传失败', 'error');
+    }
+}
+
 function openMemoryModal(data) {
     const form = document.getElementById('memoryForm');
     const title = document.getElementById('memoryModalTitle');
 
     form.reset();
     form.querySelector('[name=id]').value = '';
+    memImageUrl.value = '';
+    memCoverPreview.src = '';
+    memCoverPreview.classList.add('hidden');
+    memCoverPlaceholder.classList.remove('hidden');
 
     if (data) {
         title.textContent = '编辑回忆';
         form.querySelector('[name=id]').value = data.id;
         form.querySelector('[name=title]').value = data.title || '';
         form.querySelector('[name=event_time]').value = (data.event_time || '').replace(' ', 'T').substring(0, 16);
-        form.querySelector('[name=image]').value = data.image || '';
+        if (data.image) {
+            memImageUrl.value = data.image;
+            memCoverPreview.src = data.image;
+            memCoverPreview.classList.remove('hidden');
+            memCoverPlaceholder.classList.add('hidden');
+        }
     } else {
         title.textContent = '新增回忆';
         form.querySelector('[name=event_time]').value = new Date().toISOString().slice(0, 16);
@@ -191,7 +254,7 @@ async function saveMemory() {
     const data = {
         title: form.querySelector('[name=title]').value.trim(),
         event_time: form.querySelector('[name=event_time]').value,
-        image: form.querySelector('[name=image]').value.trim(),
+        image: memImageUrl.value.trim(),
     };
 
     if (!data.title) { showToast('请输入标题', 'error'); return; }
@@ -221,3 +284,4 @@ async function saveMemory() {
     }
 }
 </script>
+

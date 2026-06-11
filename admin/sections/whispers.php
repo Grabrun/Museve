@@ -40,6 +40,9 @@ try {
         <h1 class="text-2xl font-serif text-museve-night">悄悄话管理</h1>
         <p class="text-sm text-museve-gray mt-1">共 <?= $total ?> 条悄悄话</p>
     </div>
+    <button onclick="openWhisperCreateModal()" class="bg-museve-rose hover:bg-museve-rose-deep text-white px-4 py-2 rounded-lg text-sm transition-colors">
+        <i class="ph ph-plus mr-1"></i> 新增悄悄话
+    </button>
 </div>
 
 <!-- 搜索 -->
@@ -146,11 +149,20 @@ try {
 </style>
 
 <script>
+function openWhisperCreateModal() {
+    const form = document.getElementById('whisperForm');
+    form.reset();
+    form.querySelector('[name=id]').value = '';
+    document.querySelector('#whisperModal h2').textContent = '新增悄悄话';
+    openModal('whisperModal');
+}
+
 function openWhisperModal(data) {
     const form = document.getElementById('whisperForm');
     form.reset();
     form.querySelector('[name=id]').value = data.id;
     form.querySelector('[name=content]').value = data.content || '';
+    document.querySelector('#whisperModal h2').textContent = '编辑悄悄话';
     openModal('whisperModal');
 }
 
@@ -161,16 +173,21 @@ async function saveWhisper() {
 
     if (!content) { showToast('请输入内容', 'error'); return; }
 
+    const isCreate = !id;
+    const url = isCreate ? '/admin/api/whispers' : '/admin/api/whispers/' + id;
+    const body = { content: content };
+    if (!isCreate) body._method = 'PUT';
+
     try {
-        const res = await fetch('/admin/api/whispers/' + id, {
+        const res = await fetch(url, {
             method: 'POST',
             headers: csrfHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ _method: 'PUT', content: content })
+            body: JSON.stringify(body)
         });
         const result = await res.json();
 
-        if (result.code === 200) {
-            showToast('悄悄话更新成功', 'success');
+        if (result.code === 200 || result.code === 201) {
+            showToast(isCreate ? '悄悄话创建成功' : '悄悄话更新成功', 'success');
             closeModal('whisperModal');
             setTimeout(() => location.reload(), 500);
         } else {

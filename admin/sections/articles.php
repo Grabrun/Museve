@@ -14,7 +14,7 @@ $totalPages = 0;
 try {
     $where = '';
     $params = [];
-    if ($status && in_array($status, ['draft','published','pending','archived','deleted'])) {
+    if ($status && in_array($status, ['draft','published','pending','archived'])) {
         $where = "WHERE a.status = ?";
         $params[] = $status;
     }
@@ -40,9 +40,8 @@ $statusColors = [
     'draft' => 'bg-[#8E827F]/20 text-[#8E827F]',
     'pending' => 'bg-[#E0A96D]/20 text-[#E0A96D]',
     'archived' => 'bg-[#9BADB7]/20 text-[#9BADB7]',
-    'deleted' => 'bg-[#D18B8B]/20 text-[#D18B8B]',
 ];
-$statusLabels = ['draft'=>'草稿','published'=>'已发布','pending'=>'待审核','archived'=>'已归档','deleted'=>'已删除'];
+$statusLabels = ['draft'=>'草稿','published'=>'已发布','pending'=>'待审核','archived'=>'已归档'];
 ?>
 
 <div class="flex items-center justify-between mb-6">

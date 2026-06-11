@@ -103,7 +103,27 @@ document.addEventListener('pjax:complete', () => {
 });
 
 /* ==========================================
- * 6. 键盘快捷键
+ * 6. 全局 401 拦截 — 登录过期自动跳转
+ * ========================================== */
+(function patchFetch() {
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+        return originalFetch.apply(this, args).then(async (res) => {
+            if (res.status === 401 && res.headers.get('content-type')?.includes('json')) {
+                const clone = res.clone();
+                const body = await clone.json();
+                if (body.code === 401) {
+                    window.location.href = '/admin/login';
+                    return Promise.reject(new Error('unauthorized'));
+                }
+            }
+            return res;
+        });
+    };
+})();
+
+/* ==========================================
+ * 7. 键盘快捷键
  * ========================================== */
 document.addEventListener('keydown', (e) => {
     // ESC 关闭模态框
