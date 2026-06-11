@@ -42,6 +42,20 @@ const TABLE_DEFINITIONS = [
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ",
 
+    // 里程碑表
+    'milestones' => "
+        CREATE TABLE IF NOT EXISTS `milestones` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `date` VARCHAR(20) NOT NULL DEFAULT '',
+            `title` VARCHAR(255) NOT NULL DEFAULT '',
+            `description` TEXT,
+            `icon` VARCHAR(100) NOT NULL DEFAULT 'ph-flower-tulip',
+            `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_sort` (`sort_order`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ",
+
     // 悄悄话表
     'whispers' => "
         CREATE TABLE IF NOT EXISTS `whispers` (
@@ -51,6 +65,20 @@ const TABLE_DEFINITIONS = [
             `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX `idx_author_id` (`author_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ",
+
+    // 里程碑表
+    'milestones' => "
+        CREATE TABLE IF NOT EXISTS `milestones` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `date` VARCHAR(20) NOT NULL DEFAULT '',
+            `title` VARCHAR(255) NOT NULL DEFAULT '',
+            `description` TEXT,
+            `icon` VARCHAR(100) NOT NULL DEFAULT 'ph-flower-tulip',
+            `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_sort` (`sort_order`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ",
 
@@ -67,6 +95,20 @@ const TABLE_DEFINITIONS = [
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX `idx_author_id` (`author_id`),
             INDEX `idx_status` (`status`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ",
+
+    // 里程碑表
+    'milestones' => "
+        CREATE TABLE IF NOT EXISTS `milestones` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `date` VARCHAR(20) NOT NULL DEFAULT '',
+            `title` VARCHAR(255) NOT NULL DEFAULT '',
+            `description` TEXT,
+            `icon` VARCHAR(100) NOT NULL DEFAULT 'ph-flower-tulip',
+            `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_sort` (`sort_order`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ",
 
@@ -87,11 +129,39 @@ const TABLE_DEFINITIONS = [
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ",
 
+    // 里程碑表
+    'milestones' => "
+        CREATE TABLE IF NOT EXISTS `milestones` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `date` VARCHAR(20) NOT NULL DEFAULT '',
+            `title` VARCHAR(255) NOT NULL DEFAULT '',
+            `description` TEXT,
+            `icon` VARCHAR(100) NOT NULL DEFAULT 'ph-flower-tulip',
+            `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_sort` (`sort_order`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ",
+
     // 设置表
     'settings' => "
         CREATE TABLE IF NOT EXISTS `settings` (
             `key` VARCHAR(100) PRIMARY KEY,
             `value` TEXT NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ",
+
+    // 里程碑表
+    'milestones' => "
+        CREATE TABLE IF NOT EXISTS `milestones` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `date` VARCHAR(20) NOT NULL DEFAULT '',
+            `title` VARCHAR(255) NOT NULL DEFAULT '',
+            `description` TEXT,
+            `icon` VARCHAR(100) NOT NULL DEFAULT 'ph-flower-tulip',
+            `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_sort` (`sort_order`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ",
 
@@ -125,17 +195,18 @@ const DEFAULT_SETTINGS = [
     'site_keywords' => '暮想, Museve, 回忆, 悄悄话, 文章',
     'site_avatar'   => '/resources/images/default-avatar.png',
     'site_logo'     => '/resources/images/logo.svg',
+    'home_avatar'   => '',
     'quote_1'       => '时光会走远，记忆会永恒。',
     'quote_2'       => '每一段回忆，都值得被温柔珍藏。',
     'quote_3'       => '在薄暮时分，想起那些温暖的瞬间。',
     'icp_number'    => '',
     'copyright'     => '© 2026 暮想 Museve',
-    'social_github' => '',
-    'social_weibo'  => '',
-    'social_twitter' => '',
-    'contact_email' => '',
     'custom_footer' => '',
-    'announcement'  => '',
+    'upload_max_size' => '5',
+    'upload_allowed_types' => 'image/jpeg,image/png,image/gif,image/webp',
+    'cdn_prefix' => '',
+    'login_token_expiry' => '30',
+    'maintenance_mode' => '0',
 ];
 
 // ============================================================

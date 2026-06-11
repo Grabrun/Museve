@@ -106,6 +106,7 @@ $adminRoutes = [
     '/admin/settings'   => 'sections/settings.php',
     '/admin/users'      => 'sections/users.php',
     '/admin/logs'       => 'sections/logs.php',
+    '/admin/milestones' => 'sections/milestones.php',
 ];
 
 $content = null;

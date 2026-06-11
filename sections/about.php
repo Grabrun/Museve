@@ -47,18 +47,12 @@
                 <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#DDB8B8] via-[#A8C5DA] to-[#DDB8B8] opacity-40 transform md:-translate-x-1/2"></div>
 
                 <?php
-                $timeline = [
-                    ['2025-12', 'V1.0 项目诞生', '暮想项目正式立项，确定品牌方向与设计理念，梦想从这里起航。', 'ph-rocket-launch'],
-                    ['2026-01', 'V2.0 回忆时光轴', '完成品牌色彩体系、回忆时光轴核心功能开发，记录时间的温柔。', 'ph-clock-countdown'],
-                    ['2026-02', 'V3.0 文章系统', '文章编辑与发布系统上线，支持图文混排，让文字自由表达。', 'ph-article'],
-                    ['2026-03', 'V4.0 后台管理', '后台管理系统搭建完成，涵盖内容管理、用户管理等核心功能。', 'ph-gear-six'],
-                    ['2026-04', 'V4.1 功能完善', '悄悄话、图片上传、评论系统等功能迭代，体验不断打磨。', 'ph-puzzle-piece'],
-                    ['2026-05', 'V5.0 情感化设计', '引入情感化设计理念，滚动动画、品牌沉浸感全面升级。', 'ph-palette'],
-                    ['2026-06', 'V5.2 标准化重构', '全面标准化重构，代码规范、性能优化、组件化开发。', 'ph-seal-check'],
-                ];
+                // 从数据库加载里程碑
+                $db = getDB();
+                $milestones = $db->query("SELECT * FROM milestones ORDER BY sort_order ASC")->fetchAll();
                 ?>
 
-                <?php foreach ($timeline as $idx => $item): ?>
+                <?php foreach ($milestones as $idx => $item): ?>
                     <?php $isLeft = ($idx % 2 === 0); ?>
                     <div class="scroll-reveal relative flex items-start mb-8 <?= $isLeft ? 'md:flex-row' : 'md:flex-row-reverse' ?>">
                         <!-- 节点 -->
@@ -69,11 +63,11 @@
                         <div class="ml-10 md:ml-0 <?= $isLeft ? 'md:w-[calc(50%-2rem)] md:pr-8 md:text-right' : 'md:w-[calc(50%-2rem)] md:pl-8' ?>">
                             <div class="bg-white/60 backdrop-blur-md rounded-xl p-5 shadow-sm border border-white/50 hover:shadow-md transition-shadow group">
                                 <div class="flex items-center gap-2 <?= $isLeft ? 'md:justify-end' : '' ?> mb-2">
-                                    <i class="ph <?= $item[3] ?> text-[#A8C5DA] text-lg"></i>
-                                    <time class="text-sm text-[#A8C5DA] font-semibold"><?= $item[0] ?></time>
+                                    <i class="ph <?= htmlspecialchars($item['icon'] ?? 'ph-flower-tulip') ?> text-[#A8C5DA] text-lg"></i>
+                                    <time class="text-sm text-[#A8C5DA] font-semibold"><?= htmlspecialchars($item['date']) ?></time>
                                 </div>
-                                <h4 class="text-lg font-serif text-[#3E3640] mb-2 group-hover:text-[#DDB8B8] transition-colors"><?= $item[1] ?></h4>
-                                <p class="text-sm text-[#8E827F] leading-relaxed"><?= $item[2] ?></p>
+                                <h4 class="text-lg font-serif text-[#3E3640] mb-2 group-hover:text-[#DDB8B8] transition-colors"><?= htmlspecialchars($item['title']) ?></h4>
+                                <p class="text-sm text-[#8E827F] leading-relaxed"><?= htmlspecialchars($item['description'] ?? '') ?></p>
                             </div>
                         </div>
                     </div>
@@ -110,46 +104,6 @@
                         <p class="text-xs text-[#8E827F] mt-1"><?= $tech[1] ?></p>
                     </div>
                 <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- 联系方式 & 友情链接 -->
-        <div class="scroll-reveal grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- 联系方式 -->
-            <div class="bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-md p-6">
-                <h3 class="text-lg font-serif text-[#3E3640] mb-4">
-                    <i class="ph ph-paper-plane-tilt text-[#A8C5DA]"></i> 联系我们
-                </h3>
-                <div class="space-y-3">
-                    <a href="mailto:admin@museve.com" class="flex items-center gap-3 text-sm text-[#5A5055] hover:text-[#DDB8B8] transition-colors group">
-                        <i class="ph ph-envelope text-[#A8C5DA] group-hover:text-[#DDB8B8] transition-colors"></i>
-                        admin@museve.com
-                    </a>
-                    <a href="https://github.com" target="_blank" class="flex items-center gap-3 text-sm text-[#5A5055] hover:text-[#DDB8B8] transition-colors group">
-                        <i class="ph ph-github-logo text-[#A8C5DA] group-hover:text-[#DDB8B8] transition-colors"></i>
-                        GitHub
-                    </a>
-                    <div class="flex items-center gap-3 text-sm text-[#5A5055]">
-                        <i class="ph ph-clock text-[#A8C5DA]"></i>
-                        <span>通常在 24 小时内回复</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 友情链接 -->
-            <div class="bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-md p-6">
-                <h3 class="text-lg font-serif text-[#3E3640] mb-4">
-                    <i class="ph ph-link text-[#A8C5DA]"></i> 友情链接
-                </h3>
-                <div class="space-y-3">
-                    <a href="#" class="flex items-center gap-3 text-sm text-[#5A5055] hover:text-[#DDB8B8] transition-colors group">
-                        <i class="ph ph-arrow-square-out text-[#A8C5DA] group-hover:text-[#DDB8B8] transition-colors"></i>
-                        欢迎交换友情链接
-                    </a>
-                    <p class="text-xs text-[#8E827F] leading-relaxed pl-7">
-                        如果你也喜欢记录与回忆，欢迎通过邮件联系我们交换链接。
-                    </p>
-                </div>
             </div>
         </div>
 

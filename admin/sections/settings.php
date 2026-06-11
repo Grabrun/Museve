@@ -71,6 +71,20 @@ try {
                     </div>
                 </div>
             </div>
+            <div>
+                <label class="text-sm text-[#8E827F]">首页头像（引语上方）</label>
+                <div class="mt-2 flex items-center gap-4">
+                    <div class="w-20 h-20 rounded-full bg-[#F9F7F4] border border-[#E5E0DB] flex items-center justify-center overflow-hidden">
+                        <img id="homeAvatarPreview" src="<?= htmlspecialchars($settings['site_avatar'] ?? '/resources/images/default-avatar.png') ?>" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <input type="file" accept="image/*" onchange="previewImage(this, 'homeAvatarPreview')" class="text-sm text-[#8E827F]">
+                        <input type="text" name="home_avatar" value="<?= htmlspecialchars($settings['home_avatar'] ?? '') ?>" placeholder="留空使用默认头像"
+                               class="w-full mt-1 px-3 py-1.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded text-xs focus:outline-none focus:border-[#DDB8B8] setting-input">
+                        <p class="text-xs text-[#8E827F] mt-1">建议正方形，可填URL或上传</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -110,33 +124,56 @@ try {
         </div>
     </div>
 
-    <!-- 社交链接 -->
+    <!-- 上传设置 -->
     <div class="bg-white rounded-xl p-6">
-        <h2 class="text-lg font-semibold text-[#3E3640] mb-4">社交链接</h2>
+        <h2 class="text-lg font-semibold text-[#3E3640] mb-4">上传设置</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="text-sm text-[#8E827F]">GitHub</label>
-                <input type="url" name="social_github" value="<?= htmlspecialchars($settings['social_github'] ?? '') ?>"
-                       placeholder="https://github.com/username"
+                <label class="text-sm text-[#8E827F]">最大上传大小 (MB)</label>
+                <input type="number" name="upload_max_size" value="<?= htmlspecialchars($settings['upload_max_size'] ?? '5') ?>"
+                       min="1" max="100"
                        class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
             </div>
             <div>
-                <label class="text-sm text-[#8E827F]">微博</label>
-                <input type="text" name="social_weibo" value="<?= htmlspecialchars($settings['social_weibo'] ?? '') ?>"
-                       placeholder="微博用户名"
+                <label class="text-sm text-[#8E827F]">允许的文件类型</label>
+                <input type="text" name="upload_allowed_types" value="<?= htmlspecialchars($settings['upload_allowed_types'] ?? 'image/jpeg,image/png,image/gif,image/webp') ?>"
+                       placeholder="image/jpeg,image/png"
                        class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
             </div>
-            <div>
-                <label class="text-sm text-[#8E827F]">Twitter / X</label>
-                <input type="text" name="social_twitter" value="<?= htmlspecialchars($settings['social_twitter'] ?? '') ?>"
-                       placeholder="@username"
-                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+        </div>
+    </div>
+
+    <!-- 高级设置 -->
+    <div class="bg-white rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-[#3E3640] mb-4">高级设置</h2>
+        <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-[#8E827F]">CDN 前缀</label>
+                    <input type="text" name="cdn_prefix" value="<?= htmlspecialchars($settings['cdn_prefix'] ?? '') ?>"
+                           placeholder="https://cdn.example.com"
+                           class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+                </div>
+                <div>
+                    <label class="text-sm text-[#8E827F]">登录凭据有效期（分钟）</label>
+                    <input type="number" name="login_token_expiry" value="<?= htmlspecialchars($settings['login_token_expiry'] ?? '30') ?>"
+                           min="5" max="1440"
+                           class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+                </div>
             </div>
             <div>
-                <label class="text-sm text-[#8E827F]">联系邮箱</label>
-                <input type="email" name="contact_email" value="<?= htmlspecialchars($settings['contact_email'] ?? '') ?>"
-                       placeholder="hello@example.com"
-                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
+                <label class="text-sm text-[#8E827F]">维护模式</label>
+                <div class="mt-2 flex items-center gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="maintenance_mode" value="1" <?= ($settings['maintenance_mode'] ?? '0') === '1' ? 'checked' : '' ?> class="text-[#DDB8B8]">
+                        <span class="text-sm text-[#D18B8B]">开启</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="maintenance_mode" value="0" <?= ($settings['maintenance_mode'] ?? '0') !== '1' ? 'checked' : '' ?> class="text-[#DDB8B8]">
+                        <span class="text-sm text-[#87A878]">关闭</span>
+                    </label>
+                    <span class="text-xs text-[#8E827F] ml-2">开启后前台将显示维护提示页面</span>
+                </div>
             </div>
         </div>
     </div>
@@ -151,10 +188,10 @@ try {
                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input font-mono resize-none"><?= htmlspecialchars($settings['custom_footer'] ?? '') ?></textarea>
         </div>
         <div class="mt-4">
-            <label class="text-sm text-[#8E827F]">公告（首页显示）</label>
-            <textarea name="announcement" rows="2"
-                      placeholder="站点公告内容"
-                      class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input resize-none"><?= htmlspecialchars($settings['announcement'] ?? '') ?></textarea>
+            <label class="text-sm text-[#8E827F]">版权信息</label>
+            <input type="text" name="copyright" value="<?= htmlspecialchars($settings['copyright'] ?? '') ?>"
+                   placeholder="© 2026 暮想 Museve"
+                   class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
         </div>
     </div>
 
