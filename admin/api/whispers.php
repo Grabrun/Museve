@@ -85,10 +85,8 @@ switch ($method) {
         $params = [':content' => $content];
         
         $signature = trim($body['signature'] ?? '');
-        if ($signature) {
-            $fields[] = 'signature = :signature';
-            $params[':signature'] = $signature;
-        }
+        $fields[] = 'signature = :signature';
+        $params[':signature'] = $signature;
         
         $createdAt = $body['created_at'] ?? null;
         if ($createdAt && strtotime($createdAt)) {

@@ -66,14 +66,15 @@ try {
         <thead class="bg-[#F9F7F4] text-left text-xs text-museve-gray uppercase tracking-wider">
             <tr>
                 <th class="px-5 py-3">内容预览</th>
-                <th class="px-5 py-3">作者</th>
+                <th class="px-5 py-3">创建者</th>
+                <th class="px-5 py-3">署名</th>
                 <th class="px-5 py-3">时间</th>
                 <th class="px-5 py-3">操作</th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($list)): ?>
-            <tr><td colspan="4" class="px-5 py-12 text-center text-museve-gray">
+            <tr><td colspan="5" class="px-5 py-12 text-center text-museve-gray">
                 <i class="ph ph-chat-circle-dots text-3xl mb-2 block opacity-40"></i>
                 暂无悄悄话
             </td></tr>
@@ -83,6 +84,7 @@ try {
                     <div class="line-clamp-2"><?= htmlspecialchars(mb_substr($item['content'], 0, 100)) ?></div>
                 </td>
                 <td class="px-5 py-3 text-sm text-museve-gray whitespace-nowrap"><?= htmlspecialchars($item['author_name'] ?? '匿名') ?></td>
+                <td class="px-5 py-3 text-sm text-museve-gray whitespace-nowrap"><?= htmlspecialchars($item['signature'] ?? '') ?: '<span class="text-museve-haze">未署名</span>' ?></td>
                 <td class="px-5 py-3 text-sm text-museve-gray whitespace-nowrap"><?= date('m-d H:i', strtotime($item['created_at'])) ?></td>
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-2">
