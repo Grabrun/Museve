@@ -28,7 +28,7 @@ $pageTitle = $isEdit ? '编辑文章' : '新增文章';
 </div>
 
 <form id="articleForm" class="space-y-6 pb-24">
-    <input type="hidden" name="id" value="<?= $id ?>">
+    <input type="hidden" name="id" value="<?= $id ?: '' ?>">
 
     <!-- 标题 -->
     <div>
@@ -84,8 +84,9 @@ $pageTitle = $isEdit ? '编辑文章' : '新增文章';
                     <?php endif; ?>
                     <input type="file" id="coverInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
                 </div>
-                <input type="hidden" name="cover" id="coverUrl" value="<?= htmlspecialchars($article['cover'] ?? '') ?>">
-                <p class="text-[10px] text-museve-gray/50 mt-2">支持 JPG/PNG/WebP，建议 16:9</p>
+                <input type="text" name="cover" id="coverUrl" value="<?= htmlspecialchars($article['cover'] ?? '') ?>" placeholder="封面URL或点击上传..."
+                       class="w-full mt-2 px-3 py-1.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded text-xs focus:outline-none focus:border-museve-rose transition-colors">
+                <p class="text-[10px] text-museve-gray/50 mt-2">支持 JPG/PNG/WebP，建议 16:9，可填URL或上传</p>
             </div>
         </div>
     </div>

@@ -8,9 +8,21 @@ while ($row = $settingsStmt->fetch()) {
 }
 $siteTitle = $settings['site_title'] ?? '暮想';
 $siteSubtitle = $settings['site_subtitle'] ?? '在薄暮时分，温柔地想起。';
+$siteDescription = $settings['site_description'] ?? $siteSubtitle;
+$siteKeywords = $settings['site_keywords'] ?? '暮想,Museve,回忆,悄悄话,文章,时光,纪念';
 $config = require __DIR__ . '/config.php';
 $favicon = $config['site']['favicon'];
-$logo = $config['site']['logo'];
+$logo = $settings['site_logo'] ?: ($config['site']['logo'] ?? '/resources/images/logo.svg');
+$logoFavicon = $settings['site_logo'] ?? '/resources/images/logo.svg';
+$cacheVer = $settings['cache_version'] ?? '1';
+
+/**
+ * 给静态资源URL附加缓存版本号，修改后浏览器自动刷新
+ */
+function cacheBust(string $url, string $ver): string {
+    $sep = strpos($url, '?') === false ? '?' : '&';
+    return $url . $sep . 'v=' . urlencode($ver);
+}
 
 // 导航高亮
 $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -27,18 +39,18 @@ $navItems = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($siteTitle) ?></title>
-    <meta name="description" content="<?= htmlspecialchars($siteSubtitle) ?>">
-    <meta name="keywords" content="暮想,Museve,回忆,悄悄话,文章,时光,纪念">
+    <meta name="description" content="<?= htmlspecialchars($siteDescription) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars($siteKeywords) ?>">
     <meta name="author" content="<?= htmlspecialchars($siteTitle) ?>">
     <meta property="og:title" content="<?= htmlspecialchars($siteTitle) ?>">
-    <meta property="og:description" content="<?= htmlspecialchars($siteSubtitle) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars($siteDescription) ?>">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="<?= htmlspecialchars($siteTitle) ?>">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="<?= htmlspecialchars($siteTitle) ?>">
-    <meta name="twitter:description" content="<?= htmlspecialchars($siteSubtitle) ?>">
+    <meta name="twitter:description" content="<?= htmlspecialchars($siteDescription) ?>">
     <meta name="theme-color" content="#DDB8B8">
-    <link rel="icon" href="<?= htmlspecialchars($favicon) ?>">
+    <link rel="icon" href="<?= htmlspecialchars(cacheBust($favicon, $cacheVer)) ?>">
 
     <!-- 字体: Noto Serif SC (正文) + Inter (UI) + ZCOOL XiaoWei (品牌手写) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,7 +98,7 @@ $navItems = [
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
         <!-- Logo & Brand -->
         <a href="/" class="flex items-center gap-2.5" data-pjax>
-            <img src="<?= htmlspecialchars($logo) ?>" alt="Logo" class="h-8 w-8">
+            <img src="<?= htmlspecialchars(cacheBust($logo, $cacheVer)) ?>" alt="Logo" class="h-8 w-8">
             <div>
                 <span class="text-lg font-serif font-semibold tracking-wide"><?= htmlspecialchars($siteTitle) ?></span>
                 <span class="hidden sm:inline text-xs text-museve-gray ml-2 font-hand"><?= htmlspecialchars($siteSubtitle) ?></span>

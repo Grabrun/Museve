@@ -19,7 +19,10 @@ function isAdminLoggedIn(): bool {
             $stmt->execute([$_COOKIE['museve_token']]);
             $user = $stmt->fetch();
             if ($user) {
+                $_SESSION['admin_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['admin_account'] = $user['account'];
+                $_SESSION['admin_role'] = $user['role'];
                 return true;
             }
         }
@@ -108,6 +111,14 @@ $adminRoutes = [
     '/admin/logs'       => 'sections/logs.php',
     '/admin/milestones' => 'sections/milestones.php',
 ];
+
+// 管理员专属页面，非 admin 跳转到仪表盘
+$adminOnlyPages = ['/admin/users', '/admin/settings', '/admin/logs'];
+$userRole = $_SESSION['admin_role'] ?? '';
+if (in_array($path, $adminOnlyPages) && $userRole !== 'admin') {
+    header('Location: /admin');
+    exit;
+}
 
 $content = null;
 $matched = false;

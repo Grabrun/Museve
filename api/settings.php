@@ -11,7 +11,7 @@ if ($method === 'GET') {
     try {
         $db = getDB();
 
-        $publicKeys = ['site_title', 'site_subtitle', 'site_avatar', 'site_logo', 'icp_number', 'copyright', 'quote_1', 'quote_2', 'quote_3'];
+        $publicKeys = ['site_title', 'site_subtitle', 'site_avatar', 'site_logo', 'icp_number', 'police_icp', 'copyright', 'quote_1', 'quote_2', 'quote_3', 'about_text', 'cache_version'];
 
         $placeholders = implode(',', array_fill(0, count($publicKeys), '?'));
         $stmt = $db->prepare("SELECT `key`, `value` FROM settings WHERE `key` IN ($placeholders)");

@@ -1,8 +1,11 @@
 <?php
 // 暮想 Museve HTML 尾部
-$config = require __DIR__ . '/config.php';
-$siteTitle = $config['site']['title'];
-$siteSubtitle = $config['site']['subtitle'];
+$siteTitle = $settings['site_title'] ?? '暮想';
+$siteSubtitle = $settings['site_subtitle'] ?? '在薄暮时分，温柔地想起。';
+$icp = $settings['icp_number'] ?? '';
+$policeIcp = $settings['police_icp'] ?? '';
+$copyright = $settings['copyright'] ?? '';
+$customFooter = $settings['custom_footer'] ?? '';
 ?>
 </main>
 
@@ -10,7 +13,21 @@ $siteSubtitle = $config['site']['subtitle'];
     <div class="max-w-5xl mx-auto px-4">
         <p class="font-serif font-medium text-[#3E3640]"><?= htmlspecialchars($siteTitle) ?></p>
         <p class="mt-1 text-xs"><?= htmlspecialchars($siteSubtitle) ?></p>
-        <p class="mt-4 text-xs text-[#8E827F]/60">&copy; <?= date('Y') ?> <?= htmlspecialchars($siteTitle) ?> · 在薄暮时分，温柔地想起。</p>
+
+        <?php if ($copyright): ?>
+        <p class="mt-4 text-xs text-[#8E827F]/60"><?= htmlspecialchars($copyright) ?></p>
+        <?php endif; ?>
+
+        <?php if ($icp || $policeIcp): ?>
+        <div class="mt-2 text-xs text-[#8E827F]/50 space-x-2">
+            <?php if ($icp): ?><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener" class="hover:text-[#8E827F] transition-colors"><?= htmlspecialchars($icp) ?></a><?php endif; ?>
+            <?php if ($policeIcp): ?><a href="http://www.beian.gov.cn/" target="_blank" rel="noopener" class="hover:text-[#8E827F] transition-colors"><?= htmlspecialchars($policeIcp) ?></a><?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($customFooter): ?>
+        <div class="mt-3 text-xs text-[#8E827F]/60"><?= htmlspecialchars($customFooter) ?></div>
+        <?php endif; ?>
     </div>
 </footer>
 

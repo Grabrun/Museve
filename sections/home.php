@@ -252,7 +252,7 @@ $articles = $db->query("SELECT * FROM articles WHERE status='published' ORDER BY
 
 <!-- 英雄区 -->
 <section class="hero-section">
-    <img src="<?= htmlspecialchars($avatar) ?>" alt="头像" class="hero-avatar">
+    <img src="<?= htmlspecialchars(cacheBust($avatar, $settings['cache_version'] ?? '1')) ?>" alt="头像" class="hero-avatar">
     <h1 class="hero-title"><?= htmlspecialchars($siteTitle) ?></h1>
     <p class="hero-subtitle"><?= htmlspecialchars($siteSubtitle) ?></p>
 

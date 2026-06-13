@@ -10,6 +10,11 @@ $db = getDB();
 // 非 GET 请求验证 CSRF
 if ($method !== 'GET') verifyCsrfToken();
 
+// 整个用户管理 API 仅管理员可访问
+if ($currentUser['role'] !== 'admin') {
+    jsonResponse(403, '无权限');
+}
+
 // 从 URL 路径解析 ID
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $urlId = 0;

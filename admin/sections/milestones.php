@@ -35,6 +35,25 @@ try {
     </button>
 </div>
 
+<!-- 关于暮想设置 -->
+<div class="bg-white rounded-xl p-6 mb-6 border border-[#E5E0DB]/50">
+    <h2 class="text-lg font-semibold text-museve-night mb-2">关于暮想</h2>
+    <p class="text-xs text-museve-gray mb-3">展示在开发历程页面的品牌介绍文字。</p>
+    <?php
+    $aboutTextStmt = $db->prepare("SELECT `value` FROM settings WHERE `key` = ?");
+    $aboutTextStmt->execute(['about_text']);
+    $aboutText = $aboutTextStmt->fetchColumn() ?: '';
+    ?>
+    <textarea id="aboutText" rows="4" placeholder="关于暮想的介绍文字..."
+              class="w-full px-3 py-2.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-museve-rose transition-colors resize-none font-serif"><?= htmlspecialchars($aboutText) ?></textarea>
+    <div class="flex justify-end mt-3">
+        <button onclick="saveAboutText()" id="saveAboutBtn"
+                class="px-4 py-2 bg-museve-rose text-white rounded-lg text-sm hover:bg-museve-rose-deep transition-colors shadow-sm">
+            <i class="ph ph-check mr-1"></i> 保存关于暮想
+        </button>
+    </div>
+</div>
+
 <div class="bg-white rounded-xl overflow-hidden border border-[#E5E0DB]/50">
     <table class="w-full">
         <thead class="bg-[#F9F7F4] text-left text-xs text-museve-gray uppercase tracking-wider">
@@ -132,6 +151,21 @@ try {
 </div>
 
 <script>
+async function saveAboutText() {
+    const text = document.getElementById('aboutText').value.trim();
+    const res = await fetch('/admin/api/settings', {
+        method: 'POST',
+        headers: csrfHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ about_text: text, _method: 'PUT' })
+    });
+    const result = await res.json();
+    if (result.code === 200) {
+        showToast('关于暮想已保存', 'success');
+    } else {
+        showToast(result.message || '保存失败', 'error');
+    }
+}
+
 function openMilestoneModal(data) {
     const form = document.getElementById('milestoneForm');
     const title = document.getElementById('milestoneModalTitle');

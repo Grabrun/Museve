@@ -19,7 +19,7 @@ if (preg_match('/\/(\d+)\/?$/', $path, $m)) {
 $authorFilter = '';
 $authorParams = [];
 if ($user['role'] === 'author') {
-    $authorFilter = ' AND a.author_id = :author_id';
+    $authorFilter = ' AND author_id = :author_id';
     $authorParams[':author_id'] = $user['id'];
 }
 

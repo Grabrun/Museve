@@ -106,7 +106,8 @@ $roleColors = ['admin' => 'bg-[#DDB8B8]/20 text-[#DDB8B8]', 'author' => 'bg-[#A8
                     </div>
                     <input type="file" id="editAvatarInput" accept="image/*" class="text-sm text-[#8E827F]">
                 </div>
-                <input type="hidden" name="avatar" id="editAvatarUrl" value="">
+                <input type="text" name="avatar" id="editAvatarUrl" value="" placeholder="头像URL或上传..."
+                       class="w-full mt-2 px-3 py-1.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded text-xs focus:outline-none focus:border-museve-rose transition-colors">
             </div>
             <div>
                 <label class="text-sm text-[#8E827F]">账号</label>

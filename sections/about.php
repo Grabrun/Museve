@@ -12,7 +12,7 @@
                 $logo = $settings['site_logo'] ?? '';
                 if (!empty($logo)):
                 ?>
-                    <img src="<?= htmlspecialchars($logo) ?>" alt="Logo" class="w-20 h-20 mx-auto rounded-full shadow-md object-cover">
+                    <img src="<?= htmlspecialchars(cacheBust($logo, $settings['cache_version'] ?? '1')) ?>" alt="Logo" class="w-20 h-20 mx-auto rounded-full shadow-md object-cover">
                 <?php else: ?>
                     <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#DDB8B8] to-[#A8C5DA] flex items-center justify-center shadow-md">
                         <i class="ph ph-flower-tulip text-3xl text-white"></i>
@@ -27,12 +27,21 @@
                     <i class="ph ph-heart text-[#DDB8B8] text-xl"></i>
                     <h3 class="text-xl font-serif text-[#3E3640]">关于暮想</h3>
                 </div>
-                <p class="text-[#5A5055] leading-relaxed font-serif">
-                    暮想（Museve）是一个情感化的纪念网站，旨在用最温柔的方式，记录那些值得被珍藏的回忆。每一个像素都在轻声说：你的回忆，值得被温柔珍藏。
-                </p>
-                <p class="text-[#5A5055] leading-relaxed font-serif mt-4">
-                    我们相信，时光如水，回忆如花。每一段故事、每一句悄悄话、每一篇文章，都是生命中不可复制的瞬间。暮想希望成为这些瞬间的温柔容器。
-                </p>
+                <?php
+                $aboutTextStmt = $db->prepare("SELECT `value` FROM settings WHERE `key` = ?");
+                $aboutTextStmt->execute(['about_text']);
+                $aboutText = $aboutTextStmt->fetchColumn() ?: '';
+                ?>
+                <?php if ($aboutText): ?>
+                    <?= nl2br(htmlspecialchars($aboutText)) ?>
+                <?php else: ?>
+                    <p class="text-[#5A5055] leading-relaxed font-serif">
+                        暮想（Museve）是一个情感化的纪念网站，旨在用最温柔的方式，记录那些值得被珍藏的回忆。每一个像素都在轻声说：你的回忆，值得被温柔珍藏。
+                    </p>
+                    <p class="text-[#5A5055] leading-relaxed font-serif mt-4">
+                        我们相信，时光如水，回忆如花。每一段故事、每一句悄悄话、每一篇文章，都是生命中不可复制的瞬间。暮想希望成为这些瞬间的温柔容器。
+                    </p>
+                <?php endif; ?>
             </div>
         </div>
 

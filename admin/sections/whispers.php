@@ -13,19 +13,27 @@ $totalPages = 0;
 try {
     $where = '';
     $params = [];
+    // 当前用户信息（已在 admin/index.php 中鉴权并设置 Session）
+    $authorId = (int)($_SESSION['admin_id'] ?? 0);
+    $authorRole = (string)($_SESSION['admin_role'] ?? '');
+
     if ($search) {
         $where = "WHERE w.content LIKE ?";
         $params[] = "%$search%";
+    }
+
+    // 非管理员只能看到自己创建的内容
+    if ($authorRole !== 'admin') {
+        $where .= ($where ? ' AND' : 'WHERE') . ' w.author_id = ?';
+        $params[] = $authorId;
     }
 
     $countStmt = $db->prepare("SELECT COUNT(*) FROM whispers w $where");
     $countStmt->execute($params);
     $total = (int)$countStmt->fetchColumn();
 
-    $stmt = $db->prepare("SELECT w.*, u.username as author_name FROM whispers w LEFT JOIN users u ON w.author_id = u.id $where ORDER BY w.created_at DESC LIMIT :limit OFFSET :offset");
+    $stmt = $db->prepare("SELECT w.*, u.username as author_name FROM whispers w LEFT JOIN users u ON w.author_id = u.id $where ORDER BY w.created_at DESC LIMIT " . (int)$per . " OFFSET " . (int)$offset);
     foreach ($params as $i => $p) $stmt->bindValue($i + 1, $p);
-    $stmt->bindValue(':limit', $per, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -173,7 +181,8 @@ function openWhisperModal(data) {
     const form = document.getElementById('whisperForm');
     form.reset();
     form.querySelector('[name=id]').value = data.id;
-    form.querySelector('[name=username]').value = data.username || (data.author_name || '');
+    // 署名默认取 signature 字段，回退到创建者用户名
+    form.querySelector('[name=username]').value = data.signature || data.author_name || '';
     form.querySelector('[name=content]').value = data.content || '';
     const dt = (data.created_at || '').replace(' ', 'T').substring(0, 16);
     form.querySelector('[name=created_at]').value = dt;

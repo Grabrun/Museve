@@ -10,6 +10,11 @@ $db = getDB();
 // 非 GET 请求验证 CSRF
 if ($method !== 'GET') verifyCsrfToken();
 
+// 仅管理员可修改设置
+if ($method === 'PUT' && $currentUser['role'] !== 'admin') {
+    jsonResponse(403, '无权限，仅管理员可修改设置');
+}
+
 switch ($method) {
     case 'GET':
         $stmt = $db->query("SELECT `key`, `value` FROM settings");
@@ -28,6 +33,10 @@ switch ($method) {
         foreach ($data as $key => $value) {
             $stmt->execute([$key, $value]);
         }
+
+        // 更新缓存版本号，强制静态资源刷新
+        $cacheVer = time();
+        $stmt->execute(['cache_version', (string)$cacheVer]);
 
         jsonResponse(200, '设置保存成功');
         break;

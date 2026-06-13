@@ -208,6 +208,9 @@ const DEFAULT_SETTINGS = [
     'cdn_prefix' => '',
     'login_token_expiry' => '30',
     'maintenance_mode' => '0',
+    'police_icp' => '',
+    'about_text' => '',
+    'cache_version' => '1',
 ];
 
 // ============================================================

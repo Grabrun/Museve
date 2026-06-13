@@ -9,11 +9,16 @@ $menuItems = [
     '/admin/memories' => ['icon' => 'ph-clock-counter-clockwise', 'label' => '回忆管理'],
     '/admin/whispers' => ['icon' => 'ph-chat-circle-dots', 'label' => '悄悄话管理'],
     '/admin/articles' => ['icon' => 'ph-article', 'label' => '文章管理'],
-    '/admin/users' => ['icon' => 'ph-users', 'label' => '用户管理'],
-    '/admin/settings' => ['icon' => 'ph-gear-six', 'label' => '网站设置'],
-    '/admin/logs' => ['icon' => 'ph-clock-counter-clockwise', 'label' => '操作日志'],
-    '/admin/milestones' => ['icon' => 'ph-rocket-launch', 'label' => '开发历程'],
 ];
+
+// 管理员专属菜单
+$userRole = $_SESSION['admin_role'] ?? '';
+if ($userRole === 'admin') {
+    $menuItems['/admin/users'] = ['icon' => 'ph-users', 'label' => '用户管理'];
+    $menuItems['/admin/settings'] = ['icon' => 'ph-gear-six', 'label' => '网站设置'];
+    $menuItems['/admin/logs'] = ['icon' => 'ph-clock-counter-clockwise', 'label' => '操作日志'];
+    $menuItems['/admin/milestones'] = ['icon' => 'ph-rocket-launch', 'label' => '开发历程'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">

@@ -53,9 +53,11 @@ try {
                         <img id="logoPreview" src="<?= htmlspecialchars($settings['site_logo'] ?? '') ?>" class="max-w-full max-h-full" style="<?= empty($settings['site_logo']) ? 'display:none' : '' ?>">
                         <span id="logoPlaceholder" class="text-xs text-[#8E827F]" style="<?= !empty($settings['site_logo']) ? 'display:none' : '' ?>">Logo</span>
                     </div>
-                    <div>
+                    <div class="flex-1">
                         <input type="file" accept="image/*" onchange="previewImage(this, 'logoPreview', 'logoPlaceholder')" class="text-sm text-[#8E827F]">
-                        <p class="text-xs text-[#8E827F] mt-1">建议尺寸 200×200</p>
+                        <input type="text" name="site_logo" value="<?= htmlspecialchars($settings['site_logo'] ?? '') ?>" placeholder="Logo URL 或上传"
+                               class="w-full mt-1.5 px-3 py-1.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded text-xs focus:outline-none focus:border-[#DDB8B8] setting-input">
+                        <p class="text-xs text-[#8E827F] mt-1">建议尺寸 200×200，可填URL或上传</p>
                     </div>
                 </div>
             </div>
@@ -63,11 +65,13 @@ try {
                 <label class="text-sm text-[#8E827F]">默认头像</label>
                 <div class="mt-2 flex items-center gap-4">
                     <div class="w-20 h-20 rounded-full bg-[#F9F7F4] border border-[#E5E0DB] flex items-center justify-center overflow-hidden">
-                        <img id="avatarPreview" src="<?= htmlspecialchars($settings['default_avatar'] ?? '/resources/images/default-avatar.png') ?>" class="w-full h-full object-cover">
+                        <img id="avatarPreview" src="<?= htmlspecialchars($settings['site_avatar'] ?? '/resources/images/default-avatar.png') ?>" class="w-full h-full object-cover">
                     </div>
-                    <div>
+                    <div class="flex-1">
                         <input type="file" accept="image/*" onchange="previewImage(this, 'avatarPreview')" class="text-sm text-[#8E827F]">
-                        <p class="text-xs text-[#8E827F] mt-1">建议正方形</p>
+                        <input type="text" name="site_avatar" value="<?= htmlspecialchars($settings['site_avatar'] ?? '') ?>" placeholder="默认头像 URL 或上传"
+                               class="w-full mt-1.5 px-3 py-1.5 bg-[#F9F7F4] border border-[#E5E0DB] rounded text-xs focus:outline-none focus:border-[#DDB8B8] setting-input">
+                        <p class="text-xs text-[#8E827F] mt-1">建议正方形，可填URL或上传</p>
                     </div>
                 </div>
             </div>
@@ -92,15 +96,15 @@ try {
     <div class="bg-white rounded-xl p-6">
         <h2 class="text-lg font-semibold text-[#3E3640] mb-4">备案信息</h2>
         <div>
-            <label class="text-sm text-[#8E827F]">备案号</label>
+            <label class="text-sm text-[#8E827F]">网站备案号</label>
             <input type="text" name="icp_number" value="<?= htmlspecialchars($settings['icp_number'] ?? '') ?>"
                    placeholder="粤ICP备XXXXXXXX号"
                    class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
         </div>
         <div class="mt-4">
-            <label class="text-sm text-[#8E827F]">版权信息</label>
-            <input type="text" name="copyright" value="<?= htmlspecialchars($settings['copyright'] ?? '') ?>"
-                   placeholder="© 2026 暮想 Museve"
+            <label class="text-sm text-[#8E827F]">公安联网备案号</label>
+            <input type="text" name="police_icp" value="<?= htmlspecialchars($settings['police_icp'] ?? '') ?>"
+                   placeholder="XX公网安备XXXXXXXX号"
                    class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input">
         </div>
     </div>
