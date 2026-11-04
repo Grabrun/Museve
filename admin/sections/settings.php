@@ -227,12 +227,18 @@ try {
 </form>
 
 <script>
-// 监听变化
-document.querySelectorAll('.setting-input').forEach(input => {
-    input.addEventListener('input', () => {
-        document.getElementById('saveBtn').disabled = false;
-        document.getElementById('unsavedBanner').classList.remove('hidden');
-    });
+// 监听变化（按表单控件采集，不再依赖 .setting-input 类名）
+const settingsFormEl = document.getElementById('settingsForm');
+
+function markDirty() {
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('unsavedBanner').classList.remove('hidden');
+}
+
+Array.from(settingsFormEl.elements).forEach(el => {
+    if (!el.name) return;
+    if (el.type === 'file') return;
+    el.addEventListener(el.tagName === 'TEXTAREA' || el.type === 'text' || el.type === 'number' ? 'input' : 'change', markDirty);
 });
 
 function previewImage(input, previewId, placeholderId) {
@@ -252,8 +258,14 @@ function previewImage(input, previewId, placeholderId) {
 async function saveSettings() {
     const form = document.getElementById('settingsForm');
     const data = {};
-    form.querySelectorAll('.setting-input').forEach(input => {
-        data[input.name] = input.value;
+
+    // 按 name 采集全部控件。原实现只认 .setting-input 类，
+    // 于是漏了类名的控件（例如维护模式的单选框）永远不会被提交。
+    Array.from(form.elements).forEach(el => {
+        if (!el.name || el.disabled) return;
+        if (['submit', 'button', 'reset', 'file'].includes(el.type)) return;
+        if ((el.type === 'radio' || el.type === 'checkbox') && !el.checked) return;
+        data[el.name] = el.value;
     });
 
     const res = await fetch('/admin/api/settings', {
