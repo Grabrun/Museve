@@ -60,9 +60,8 @@ switch ($method) {
         if (empty($content)) jsonResponse(400, '内容不能为空');
 
         $signature = trim($body['signature'] ?? '');
-        $createdAt = $body['created_at'] ?? null;
-        if ($createdAt && !strtotime($createdAt)) $createdAt = null;
-        
+        $createdAt = museveClampCreatedAt($body['created_at'] ?? null);
+
         $stmt = $db->prepare("INSERT INTO whispers (content, signature, author_id, created_at) VALUES (:content, :signature, :author_id, " . ($createdAt ? ":created_at" : "NOW()") . ")");
         $stmt->bindValue(':content', $content);
         $stmt->bindValue(':signature', $signature);
@@ -88,8 +87,8 @@ switch ($method) {
         $fields[] = 'signature = :signature';
         $params[':signature'] = $signature;
         
-        $createdAt = $body['created_at'] ?? null;
-        if ($createdAt && strtotime($createdAt)) {
+        $createdAt = museveClampCreatedAt($body['created_at'] ?? null);
+        if ($createdAt) {
             $fields[] = 'created_at = :created_at';
             $params[':created_at'] = $createdAt;
         }
@@ -119,4 +118,36 @@ switch ($method) {
 
     default:
         jsonResponse(405, '方法不允许');
+}
+
+/**
+ * 规整悄悄话的创建时间
+ *
+ * 允许补录历史内容（往前改），但不接受未来时间——否则随便填个
+ * 2099 年就能永久霸占公开流第一位。非法格式一律回退到 NOW()。
+ *
+ * @param  mixed $raw 客户端传入的 created_at
+ * @return string|null 归一化后的 'Y-m-d H:i:s'，null 表示用 NOW()
+ */
+function museveClampCreatedAt($raw): ?string {
+    if (!is_string($raw) || trim($raw) === '') {
+        return null;
+    }
+
+    $ts = strtotime(trim($raw));
+    if ($ts === false || $ts <= 0) {
+        return null;
+    }
+
+    $now = time();
+    if ($ts > $now) {
+        return null;
+    }
+
+    // 明确早于 2000 年的时间基本是误填（例如 1970 的默认值）
+    if ($ts < strtotime('2000-01-01')) {
+        return null;
+    }
+
+    return date('Y-m-d H:i:s', $ts);
 }

@@ -2,6 +2,9 @@
 // 暮想 首页
 $db = getDB();
 
+// 设置统一取一份：本文件也可能被 Pjax 单独渲染（此时 head.php 不会加载）
+$settings = getSettings();
+
 // 读取引语设置
 $quote_1 = $settings['quote_1'] ?? '时光会走远，记忆会永恒。';
 $quote_2 = $settings['quote_2'] ?? '每一段回忆，都值得被温柔珍藏。';
@@ -9,7 +12,6 @@ $quote_3 = $settings['quote_3'] ?? '在薄暮时分，想起那些温暖的瞬�
 
 // 头像
 // 首页头像（优先 home_avatar，回退 site_avatar）
-$settings = $settings ?? [];
 $avatar = ($settings['home_avatar'] ?? '') ?: ($settings['site_avatar'] ?? '/resources/images/default-avatar.png');
 $siteTitle = $settings['site_title'] ?? '暮想';
 $siteSubtitle = $settings['site_subtitle'] ?? '在薄暮时分，温柔地想起。';
@@ -252,7 +254,7 @@ $articles = $db->query("SELECT * FROM articles WHERE status='published' ORDER BY
 
 <!-- 英雄区 -->
 <section class="hero-section">
-    <img src="<?= htmlspecialchars(cacheBust($avatar, $settings['cache_version'] ?? '1')) ?>" alt="头像" class="hero-avatar">
+    <img src="<?= htmlspecialchars(assetUrl($avatar)) ?>" alt="头像" class="hero-avatar">
     <h1 class="hero-title"><?= htmlspecialchars($siteTitle) ?></h1>
     <p class="hero-subtitle"><?= htmlspecialchars($siteSubtitle) ?></p>
 

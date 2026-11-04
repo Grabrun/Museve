@@ -29,9 +29,9 @@
 
 ## 技术栈
 
-- 后端: PHP 8.0+
+- 后端: PHP 8.1+
 - 数据库: MySQL 8.0+ (InnoDB, utf8mb4)
-- 前端: HTML5/CSS3/JS ES6+, Tailwind CSS, Alpine.js
+- 前端: HTML5/CSS3/JS ES6+, Tailwind CSS (构建期预编译), Alpine.js
 - Pjax: pjax.min.js 无刷新加载
 - 动效: Motion One
 - 编辑器: TinyMCE

@@ -15,31 +15,45 @@ if (preg_match('/admin\/api\/auth\/(\w+)/', $path, $m)) {
 
 // 退出登录
 if ($action === 'logout' && $method === 'POST') {
+    // 登出同样是状态变更：不校验 CSRF 的话，任意站点都能把访客踢下线
+    verifyCsrfToken();
+
     $token = $_COOKIE['museve_token'] ?? '';
     if ($token) {
         $stmt = $db->prepare("UPDATE users SET cookie_token = '', token_expires = NULL WHERE cookie_token = ?");
         $stmt->execute([$token]);
     }
     writeLog('logout', 'user', $_SESSION['admin_id'] ?? 0, '退出登录');
-    setcookie('museve_token', '', time() - 3600, '/', '', false, true);
-    if (session_status() === PHP_SESSION_ACTIVE) session_destroy();
+
+    clearAuthCookie();
+
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        $_SESSION = [];
+        session_destroy();
+    }
     jsonResponse(200, '已退出登录');
 }
 
 // 登录
 if ($method === 'POST' && $action === '') {
     $body = getJsonBody();
-    $account = trim($body['account'] ?? '');
-    $password = $body['password'] ?? '';
+    $account = trim((string)($body['account'] ?? ''));
+    $password = (string)($body['password'] ?? '');
 
-    if (empty($account) || empty($password)) {
+    if ($account === '' || $password === '') {
         jsonResponse(400, '请输入账号和密码');
     }
 
-    // 检查登录锁定
+    // 过长的账号直接拒绝，避免拿它去撞 VARCHAR(50)
+    if (mb_strlen($account) > 50) {
+        jsonResponse(400, '账号或密码错误');
+    }
+
+    // 检查登录锁定（IP + 账号双键，见 auth_helper.php）
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    if (checkLoginLock($ip)) {
-        jsonResponse(429, '登录尝试过多，请 30 分钟后再试');
+    if (checkLoginLock($ip, $account)) {
+        $minutes = max(1, (int)securityConfig('login_lockout_minutes', 30));
+        jsonResponse(429, "登录尝试过多，请 {$minutes} 分钟后再试");
     }
 
     $stmt = $db->prepare("SELECT * FROM users WHERE account = ? LIMIT 1");
@@ -51,30 +65,33 @@ if ($method === 'POST' && $action === '') {
         jsonResponse(2000, '账号或密码错误');
     }
 
-    // 清除登录失败记录
-    clearLoginAttempts($ip);
+    // 登录成功才清空该 IP / 账号的失败记录
+    clearLoginAttempts($ip, $account);
 
-    // 生成 token，30 分钟滑动过期
+    // 重新生成会话 ID：防会话固定（攻击者预先塞一个已知 PHPSESSID 给受害者）
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    session_regenerate_id(true);
+
+    // 生成 token，有效期取后台设置
+    $mins = tokenExpiryMinutes();
     $token = bin2hex(random_bytes(32));
-    $stmt = $db->prepare("UPDATE users SET cookie_token = ?, token_expires = DATE_ADD(NOW(), INTERVAL 30 MINUTE), last_login = NOW() WHERE id = ?");
+    $stmt = $db->prepare("UPDATE users SET cookie_token = ?, token_expires = DATE_ADD(NOW(), INTERVAL {$mins} MINUTE), last_login = NOW() WHERE id = ?");
     $stmt->execute([$token, $user['id']]);
 
-    setcookie('museve_token', $token, [
-        'expires' => time() + 86400,
-        'path' => '/',
-        'httponly' => true,
-        'samesite' => 'Strict',
-    ]);
+    setAuthCookie($token);
 
-    // 生成 CSRF Token
-    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    // 提权后换一张新的 CSRF 票据
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['admin_id']   = (int)$user['id'];
+    $_SESSION['admin_role'] = $user['role'];
 
     writeLog('login', 'user', $user['id'], "登录成功: {$user['account']}");
     jsonResponse(200, '登录成功', [
-        'id' => $user['id'],
+        'id'       => $user['id'],
         'username' => $user['username'],
-        'role' => $user['role'],
+        'role'     => $user['role'],
     ]);
 }
 

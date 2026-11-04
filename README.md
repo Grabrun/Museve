@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/PHP-8.0%2B-777BB4?style=flat-square&logo=php" alt="PHP 8.0+"></a>
+  <a href="#"><img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=flat-square&logo=php" alt="PHP 8.1+"></a>
   <a href="#"><img src="https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=flat-square&logo=mysql" alt="MySQL 8.0+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License"></a>
   <a href="https://github.com/Grabrun/Museve/releases"><img src="https://img.shields.io/github/v/release/Grabrun/Museve?style=flat-square" alt="Latest Release"></a>
@@ -66,7 +66,7 @@ TinyMCE 富文本编辑器，720px 沉浸式阅读宽度，关键词搜索，状
 Open Graph 协议 + Twitter Card + 动态 Sitemap 生成 + 语义化 HTML5 结构。
 
 ### 🛡️ 安全防护
-CSRF Token 验证、XSS 输出过滤、安全 HTTP 头、SQL 注入防护（PDO 预处理）、登录验证码。
+CSRF Token 验证、服务端富文本白名单净化、CSP/HSTS 安全响应头、SQL 注入防护（PDO 预处理）、登录限速与锁定。
 
 ### 💾 数据备份
 一键备份脚本，30 天自动清理，支持定时任务集成。
@@ -87,11 +87,11 @@ CSRF Token 验证、XSS 输出过滤、安全 HTTP 头、SQL 注入防护（PDO 
 
 | 层级 | 选型 | 说明 |
 |------|------|------|
-| **后端** | PHP 8.0+ / MySQL 8.0+ | PDO 单例连接，自动建表 |
-| **前端** | Tailwind CSS v3 / Alpine.js | 工具类优先 + 轻量响应式 JS |
+| **后端** | PHP 8.1+ / MySQL 8.0+ | PDO 单例连接，自动建表 |
+| **前端** | Tailwind CSS v3（构建期预编译）/ Alpine.js | 工具类优先 + 轻量响应式 JS，依赖全部本地化 |
 | **导航** | Pjax (pushState + AJAX) | 无刷新页面切换，保留浏览器历史 |
 | **编辑器** | TinyMCE | 富文本编辑，图片上传 |
-| **图标** | Phosphor Icons | 正则图标集，按需加载 |
+| **图标** | Phosphor Icons | 本地字体图标，不依赖 CDN |
 | **字体** | Noto Serif SC / Inter / ZCOOL XiaoWei | 中英文混排优化 |
 | **动画** | ScrollReveal | 滚动触发淡入动画 |
 
@@ -121,10 +121,10 @@ vim includes/config.php  # 填写数据库连接信息
 
 | 要求 | 最低版本 |
 |------|----------|
-| PHP | 8.0+ |
+| PHP | 8.1+ |
 | MySQL | 8.0+ |
 | Nginx / Apache | 支持 URL 重写 |
-| PHP 扩展 | PDO、PDO_MySQL、JSON、MBString |
+| PHP 扩展 | PDO、PDO_MySQL、JSON、MBString、DOM、Fileinfo |
 
 ---
 
@@ -158,42 +158,36 @@ vim includes/config.php  # 填写数据库连接信息
 
 ## 🌐 Nginx 部署
 
+完整配置见仓库根目录的 [`nginx.conf`](nginx.conf)（含 HTTPS + HSTS、敏感路径拒绝、正确的 fastcgi 参数）。这里只强调三条容易漏的：
+
+1. **必须全站 HTTPS**。认证 Cookie 的 `Secure` 属性跟随协议自动开启，纯 HTTP 下等于没有；
+2. **`fastcgi_param HTTPS $https if_not_empty;`** 要加，否则 PHP 侧判定不出 HTTPS，Cookie 与 HSTS 都不会生效；
+3. **`docs/`、`backups/`、`scripts/`、`tools/` 必须 deny**，以及 `*.md` `*.sql` `*.conf` 这类后缀。这些目录留在 webroot 就是公开可下载的。
+
 ```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    root /path/to/Museve;
-    index index.php;
-
-    # Pjax 单入口路由
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    # 后台路由
-    location /admin {
-        try_files $uri $uri/ /admin/index.php?$query_string;
-    }
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.x-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    # 静态资源缓存
-    location ~* \.(css|js|jpg|jpeg|png|gif|ico|svg|webp)$ {
-        expires 30d;
-        add_header Cache-Control "public, no-transform";
-    }
-
-    # 上传目录
-    location /uploads/ {
-        expires 7d;
-        add_header Cache-Control "public, no-transform";
-    }
-}
+# 摘自 nginx.conf，部署时至少要保住这几条
+location ^~ /docs/    { deny all; }
+location ^~ /backups/ { deny all; }
+location ^~ /scripts/ { deny all; }
+location ^~ /tools/   { deny all; }
+location ~* \.(md|conf|sql|sh|bak|ini|lock|log|swp)$ { deny all; }
 ```
+
+---
+
+## 🧱 前端资源构建
+
+页面用到的 Tailwind / Alpine / Pjax / DOMPurify / TinyMCE / Phosphor **全部本地化**，运行时不请求任何第三方 CDN（Google Fonts 除外）。
+
+产物已提交到仓库，**部署不需要 Node**；只有改了模板样式或升级依赖时才需要重建：
+
+```bash
+npm install          # 首次
+npm run build        # 预编译 Tailwind + 同步 vendor 资源
+npm run lint:php     # PHP 语法检查
+```
+
+改模板里的 class 之后务必重跑 `npm run build`，然后执行 `node tools/check-classes.mjs` 确认没有漏扫的类名。
 
 ---
 

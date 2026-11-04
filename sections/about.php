@@ -1,5 +1,7 @@
 <?php
 // 开发历程 Section
+// Pjax 单独渲染时 head.php 不会加载，这里自取一份设置
+$settings = getSettings();
 ?>
 
 <section class="px-4 py-16">
@@ -12,7 +14,7 @@
                 $logo = $settings['site_logo'] ?? '';
                 if (!empty($logo)):
                 ?>
-                    <img src="<?= htmlspecialchars(cacheBust($logo, $settings['cache_version'] ?? '1')) ?>" alt="Logo" class="w-20 h-20 mx-auto rounded-full shadow-md object-cover">
+                    <img src="<?= htmlspecialchars(assetUrl($logo)) ?>" alt="Logo" class="w-20 h-20 mx-auto rounded-full shadow-md object-cover">
                 <?php else: ?>
                     <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[#DDB8B8] to-[#A8C5DA] flex items-center justify-center shadow-md">
                         <i class="ph ph-flower-tulip text-3xl text-white"></i>
@@ -65,7 +67,7 @@
                     <?php $isLeft = ($idx % 2 === 0); ?>
                     <div class="scroll-reveal relative flex items-start mb-8 <?= $isLeft ? 'md:flex-row' : 'md:flex-row-reverse' ?>">
                         <!-- 节点 -->
-                        <div class="absolute left-2 md:left-1/2 w-5 h-5 rounded-full bg-white border-3 border-[#A8C5DA] shadow transform translate-x-1/2 md:-translate-x-1/2 z-10 mt-1 flex items-center justify-center">
+                        <div class="absolute left-2 md:left-1/2 w-5 h-5 rounded-full bg-white border-[3px] border-[#A8C5DA] shadow transform translate-x-1/2 md:-translate-x-1/2 z-10 mt-1 flex items-center justify-center">
                             <div class="w-2 h-2 rounded-full bg-[#DDB8B8]"></div>
                         </div>
                         <!-- 内容卡片 -->
@@ -92,14 +94,14 @@
 
             <?php
             $techs = [
-                ['PHP 8.0+', '后端语言', 'ph-file-code', '#DDB8B8'],
+                ['PHP 8.1+', '后端语言', 'ph-file-code', '#DDB8B8'],
                 ['MySQL 8.0+', '数据库', 'ph-database', '#A8C5DA'],
                 ['Tailwind CSS', '前端样式', 'ph-paint-brush', '#DDB8B8'],
                 ['Alpine.js', '前端交互', 'ph-lightning', '#A8C5DA'],
                 ['TinyMCE', '文章编辑器', 'ph-text-aa', '#DDB8B8'],
                 ['Phosphor Icons', '图标库', 'ph-asterisk', '#A8C5DA'],
                 ['PDO + bcrypt', '安全与数据库', 'ph-shield-check', '#DDB8B8'],
-                ['PHPMailer', '邮件服务', 'ph-envelope-simple', '#A8C5DA'],
+                ['HTML 白名单', '富文本净化', 'ph-funnel', '#A8C5DA'],
             ];
             ?>
 

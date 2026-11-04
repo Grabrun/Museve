@@ -1,28 +1,16 @@
 <?php
 // 暮想 Museve HTML 头部
-$db = getDB();
-$settingsStmt = $db->query("SELECT `key`, `value` FROM `settings`");
-$settings = [];
-while ($row = $settingsStmt->fetch()) {
-    $settings[$row['key']] = $row['value'];
-}
-$siteTitle = $settings['site_title'] ?? '暮想';
-$siteSubtitle = $settings['site_subtitle'] ?? '在薄暮时分，温柔地想起。';
-$siteDescription = $settings['site_description'] ?? $siteSubtitle;
-$siteKeywords = $settings['site_keywords'] ?? '暮想,Museve,回忆,悄悄话,文章,时光,纪念';
+// 设置统一走 getSettings()（请求内静态缓存），不再每个模板各查一遍库
+$settings = getSettings();
+
+$siteTitle       = getSetting('site_title', '暮想');
+$siteSubtitle    = getSetting('site_subtitle', '在薄暮时分，温柔地想起。');
+$siteDescription = getSetting('site_description', $siteSubtitle);
+$siteKeywords    = getSetting('site_keywords', '暮想,Museve,回忆,悄悄话,文章,时光,纪念');
+
 $config = require __DIR__ . '/config.php';
 $favicon = $config['site']['favicon'];
 $logo = $settings['site_logo'] ?: ($config['site']['logo'] ?? '/resources/images/logo.svg');
-$logoFavicon = $settings['site_logo'] ?? '/resources/images/logo.svg';
-$cacheVer = $settings['cache_version'] ?? '1';
-
-/**
- * 给静态资源URL附加缓存版本号，修改后浏览器自动刷新
- */
-function cacheBust(string $url, string $ver): string {
-    $sep = strpos($url, '?') === false ? '?' : '&';
-    return $url . $sep . 'v=' . urlencode($ver);
-}
 
 // 导航高亮
 $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -50,47 +38,23 @@ $navItems = [
     <meta name="twitter:title" content="<?= htmlspecialchars($siteTitle) ?>">
     <meta name="twitter:description" content="<?= htmlspecialchars($siteDescription) ?>">
     <meta name="theme-color" content="#DDB8B8">
-    <link rel="icon" href="<?= htmlspecialchars(cacheBust($favicon, $cacheVer)) ?>">
+    <link rel="icon" href="<?= htmlspecialchars(assetUrl($favicon)) ?>">
 
     <!-- 字体: Noto Serif SC (正文) + Inter (UI) + ZCOOL XiaoWei (品牌手写) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=ZCOOL+XiaoWei&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Phosphor Icons (线形 1.5px 描边) -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- 图标: Phosphor（本地化，regular 字重） -->
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/vendor/phosphor/style.css')) ?>">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'museve-bg': '#F9F7F4',
-                        'museve-rose': '#DDB8B8',
-                        'museve-rose-deep': '#B28B8B',
-                        'museve-haze': '#F5F2F0',
-                        'museve-blue': '#A8C5DA',
-                        'museve-night': '#3E3640',
-                        'museve-gray': '#8E827F',
-                        'museve-green': '#87A878',
-                        'museve-orange': '#E0A96D',
-                        'museve-red': '#D18B8B',
-                        'museve-ash': '#9BADB7',
-                    },
-                    fontFamily: {
-                        'serif': ['Noto Serif SC', 'Source Han Serif SC', 'serif'],
-                        'sans': ['Inter', 'system-ui', 'sans-serif'],
-                        'hand': ['ZCOOL XiaoWei', 'Caveat', 'cursive'],
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind: 构建期预编译产物，替代 cdn.tailwindcss.com 的浏览器端 JIT -->
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/css/tailwind.css')) ?>">
 
-    <link rel="stylesheet" href="/resources/css/style.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- 项目自有样式与设计令牌 -->
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/css/style.css')) ?>">
+
+    <script defer src="<?= htmlspecialchars(assetUrl('/resources/vendor/alpine/alpine.min.js')) ?>"></script>
 </head>
 <body class="bg-museve-bg text-museve-night min-h-screen font-sans" x-data="{ mobileMenu: false }">
 
@@ -98,7 +62,7 @@ $navItems = [
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
         <!-- Logo & Brand -->
         <a href="/" class="flex items-center gap-2.5" data-pjax>
-            <img src="<?= htmlspecialchars(cacheBust($logo, $cacheVer)) ?>" alt="Logo" class="h-8 w-8">
+            <img src="<?= htmlspecialchars(assetUrl($logo)) ?>" alt="Logo" class="h-8 w-8">
             <div>
                 <span class="text-lg font-serif font-semibold tracking-wide"><?= htmlspecialchars($siteTitle) ?></span>
                 <span class="hidden sm:inline text-xs text-museve-gray ml-2 font-hand"><?= htmlspecialchars($siteSubtitle) ?></span>

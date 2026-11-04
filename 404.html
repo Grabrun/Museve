@@ -5,27 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - 暮想</title>
     <link rel="icon" href="/resources/images/favicon.png">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'museve-bg': '#F9F7F4',
-                        'museve-rose': '#DDB8B8',
-                        'museve-night': '#3E3640',
-                        'museve-gray': '#8E827F',
-                    },
-                    fontFamily: {
-                        'serif': ['Noto Serif SC', 'serif'],
-                        'sans': ['Inter', 'system-ui', 'sans-serif'],
-                        'hand': ['ZCOOL XiaoWei', 'cursive'],
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind: 预编译产物（404.html 也在构建扫描范围内） -->
+    <link rel="stylesheet" href="/resources/css/tailwind.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
@@ -33,6 +14,9 @@
         @keyframes glow {
             0%, 100% { opacity: 0.4; }
             50% { opacity: 0.8; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .glow { animation: none; opacity: 0.7; }
         }
     </style>
 </head>

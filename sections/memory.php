@@ -81,11 +81,6 @@ try {
     </div>
     <?php endif; ?>
 
-    <!-- 正文 -->
-    <div class="prose-museve font-serif text-[#3E3640]">
-        <?= nl2br(htmlspecialchars($memory['content'] ?? '')) ?>
-    </div>
-
     <!-- 上一篇/下一篇导航 -->
     <div class="mt-16 pt-8 border-t border-[#E5E0DB]/50">
         <div class="flex justify-between gap-4">

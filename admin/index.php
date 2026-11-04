@@ -113,7 +113,7 @@ $adminRoutes = [
 ];
 
 // 管理员专属页面，非 admin 跳转到仪表盘
-$adminOnlyPages = ['/admin/users', '/admin/settings', '/admin/logs'];
+$adminOnlyPages = ['/admin/users', '/admin/settings', '/admin/logs', '/admin/milestones'];
 $userRole = $_SESSION['admin_role'] ?? '';
 if (in_array($path, $adminOnlyPages) && $userRole !== 'admin') {
     header('Location: /admin');

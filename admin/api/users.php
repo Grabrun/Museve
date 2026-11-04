@@ -22,6 +22,21 @@ if (preg_match('/admin\/api\/users\/(\d+)/', $path, $m)) {
     $urlId = (int)$m[1];
 }
 
+/**
+ * 统计除指定用户之外的剩余管理员数量
+ *
+ * 用于阻止"把最后一位管理员降级/删除"导致全站失去管理入口（自锁）。
+ *
+ * @param  PDO $db
+ * @param  int $excludeId 要排除的用户 ID
+ * @return int
+ */
+function remainingAdmins(PDO $db, int $excludeId): int {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM users WHERE role = 'admin' AND id <> ?");
+    $stmt->execute([$excludeId]);
+    return (int)$stmt->fetchColumn();
+}
+
 switch ($method) {
     case 'GET':
         $page = max(1, intval($_GET['page'] ?? 1));
@@ -49,13 +64,17 @@ switch ($method) {
             jsonResponse(400, '账号、昵称和密码不能为空');
         }
 
+        if ($pwError = validatePasswordStrength($password)) {
+            jsonResponse(400, $pwError);
+        }
+
         $stmt = $db->prepare("SELECT COUNT(*) FROM users WHERE account = ?");
         $stmt->execute([$account]);
         if ($stmt->fetchColumn() > 0) {
             jsonResponse(422, '账号已存在');
         }
 
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+        $hashedPassword = hashPassword($password);
         $stmt = $db->prepare("INSERT INTO users (account, username, password, role, created_at) VALUES (?, ?, ?, ?, NOW())");
         $stmt->execute([$account, $username, $hashedPassword, $role]);
 
@@ -69,6 +88,11 @@ switch ($method) {
         $id = intval($data['id'] ?? 0);
         if (!$id) jsonResponse(400, '缺少用户 ID');
 
+        $targetStmt = $db->prepare("SELECT id, account, username, role FROM users WHERE id = ?");
+        $targetStmt->execute([$id]);
+        $target = $targetStmt->fetch();
+        if (!$target) jsonResponse(404, '用户不存在');
+
         $fields = [];
         $params = [];
 
@@ -76,13 +100,22 @@ switch ($method) {
             $fields[] = 'username = ?';
             $params[] = $data['username'];
         }
-        if (!empty($data['role']) && in_array($data['role'], ['admin', 'author'])) {
+
+        if (!empty($data['role']) && in_array($data['role'], ['admin', 'author'], true)) {
+            // 最后一位管理员不允许被降级，否则全站再没有任何人能进用户管理/设置
+            if ($target['role'] === 'admin' && $data['role'] !== 'admin' && remainingAdmins($db, $id) === 0) {
+                jsonResponse(403, '这是最后一位管理员，请先提升另一位用户为管理员');
+            }
             $fields[] = 'role = ?';
             $params[] = $data['role'];
         }
+
         if (!empty($data['password'])) {
+            if ($pwError = validatePasswordStrength($data['password'])) {
+                jsonResponse(400, $pwError);
+            }
             $fields[] = 'password = ?';
-            $params[] = password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => 12]);
+            $params[] = hashPassword($data['password']);
         }
 
         if (empty($fields)) {
@@ -93,7 +126,8 @@ switch ($method) {
         $stmt = $db->prepare("UPDATE users SET " . implode(', ', $fields) . " WHERE id = ?");
         $stmt->execute($params);
 
-        writeLog('update', 'user', $id, "更新用户: {$data['username']}");
+        $logName = $data['username'] ?? $target['username'];
+        writeLog('update', 'user', $id, "更新用户: {$logName}");
         jsonResponse(200, '用户更新成功');
         break;
 
@@ -102,6 +136,16 @@ switch ($method) {
         $id = $urlId ?: intval($data['id'] ?? $_GET['id'] ?? 0);
         if (!$id) jsonResponse(400, '缺少用户 ID');
         if ($id == $currentUser['id']) jsonResponse(403, '不能删除自己');
+
+        $targetStmt = $db->prepare("SELECT id, role, username FROM users WHERE id = ?");
+        $targetStmt->execute([$id]);
+        $target = $targetStmt->fetch();
+        if (!$target) jsonResponse(404, '用户不存在');
+
+        // 同 PUT：删掉最后一位管理员同样会自锁
+        if ($target['role'] === 'admin' && remainingAdmins($db, $id) === 0) {
+            jsonResponse(403, '这是最后一位管理员，不能删除');
+        }
 
         $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
         $stmt->execute([$id]);

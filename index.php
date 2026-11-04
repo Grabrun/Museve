@@ -81,6 +81,30 @@ if (!$matched && !$notFound && preg_match('#^/api/(.+)$#', $path, $m)) {
     $notFound = true;
 }
 
+// ============================================================
+// 维护模式
+// ============================================================
+// 放在 sitemap / robots / api 之后、页面渲染之前：
+//   - 搜索引擎与前端 AJAX 保持可用，便于恢复后立即正常；
+//   - 已登录的管理员可正常浏览前台（否则没法在维护期间校对内容）。
+if (getSetting('maintenance_mode', '0') === '1') {
+    $isAdminViewer = false;
+    $adminToken = $_COOKIE['museve_token'] ?? '';
+    if ($adminToken !== '') {
+        $stmt = getDB()->prepare("SELECT COUNT(*) FROM users WHERE cookie_token = ? AND token_expires > NOW()");
+        $stmt->execute([$adminToken]);
+        $isAdminViewer = (int)$stmt->fetchColumn() > 0;
+    }
+
+    if (!$isAdminViewer) {
+        http_response_code(503);
+        header('Retry-After: 3600');
+        header('Cache-Control: no-store');
+        require __DIR__ . '/sections/maintenance.php';
+        exit;
+    }
+}
+
 // 404 处理（头部设置必须在任何输出之前）
 if ($notFound || !$matched || !$content || !file_exists($content)) {
     $content = __DIR__ . '/sections/404.php';

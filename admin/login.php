@@ -1,11 +1,6 @@
 <?php
 // 暮想 Museve 后台登录页
-$db = getDB();
-$stmt = $db->query("SELECT `key`, `value` FROM `settings` WHERE `key` IN ('site_title', 'site_subtitle')");
-$settings = [];
-while ($row = $stmt->fetch()) {
-    $settings[$row['key']] = $row['value'];
-}
+$settings = getSettings();
 $siteTitle = $settings['site_title'] ?? '暮想';
 $siteSubtitle = $settings['site_subtitle'] ?? '在薄暮时分，温柔地想起。';
 ?>
@@ -15,34 +10,18 @@ $siteSubtitle = $settings['site_subtitle'] ?? '在薄暮时分，温柔地想起
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - <?= htmlspecialchars($siteTitle) ?> 管理后台</title>
-    <link rel="icon" href="/resources/images/favicon.png">
+    <link rel="icon" href="<?= htmlspecialchars(assetUrl('/resources/images/favicon.png')) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    'museve-bg': '#F9F7F4',
-                    'museve-rose': '#DDB8B8',
-                    'museve-rose-deep': '#B28B8B',
-                    'museve-night': '#3E3640',
-                    'museve-gray': '#8E827F',
-                },
-                fontFamily: {
-                    'serif': ['Noto Serif SC', 'serif'],
-                    'sans': ['Inter', 'system-ui', 'sans-serif'],
-                }
-            }
-        }
-    }
-    </script>
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/css/tailwind.css')) ?>">
     <style>
         .login-card { animation: fadeUp 0.5s ease-out; }
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .login-card { animation: none; }
         }
     </style>
 </head>

@@ -7,6 +7,12 @@ $db = getDB();
 $user = requireAuth();
 $method = getMethod();
 
+// 开发历程属于全站展示内容，与后台菜单的 admin 专属分组保持一致：
+// 仅管理员可增删改，author 连读取都不需要（页面上也没有入口）。
+if ($user['role'] !== 'admin') {
+    jsonResponse(403, '无权限，仅管理员可管理开发历程');
+}
+
 if ($method !== 'GET') verifyCsrfToken();
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

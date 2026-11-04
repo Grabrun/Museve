@@ -110,11 +110,11 @@ $pageTitle = $isEdit ? '编辑文章' : '新增文章';
     </div>
 </form>
 
-<!-- DOMPurify -->
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-<!-- TinyMCE -->
-<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
-<script src="/resources/js/admin.js"></script>
+<!-- DOMPurify（本地化） -->
+<script src="<?= htmlspecialchars(assetUrl('/resources/vendor/dompurify/purify.min.js')) ?>"></script>
+<!-- TinyMCE（本地化，仅打包实际用到的插件） -->
+<script src="<?= htmlspecialchars(assetUrl('/resources/vendor/tinymce/tinymce.min.js')) ?>"></script>
+<script src="<?= htmlspecialchars(assetUrl('/resources/js/admin.js')) ?>"></script>
 
 <script>
 // TinyMCE 初始化
@@ -137,8 +137,27 @@ tinymce.init({
     branding: false,
     menubar: false,
     convert_urls: false,
-    images_upload_url: '/admin/api/upload',
-    automatic_uploads: true,
+    // TinyMCE 自动上传无法附加自定义请求头，原来指向 images_upload_url
+    // 的请求因此过不了 CSRF 校验；改用 upload_handler 显式带 X-CSRF-Token。
+    images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+        fetch('/admin/api/upload', {
+            method: 'POST',
+            body: formData,
+            headers: csrfHeaders()
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.code === 200 && data.data && data.data.url) {
+                    resolve(data.data.url);
+                } else {
+                    reject({ message: data.message || '上传失败', remove: true });
+                }
+            })
+            .catch(() => reject({ message: '上传失败', remove: true }));
+    }),
     file_picker_types: 'image',
 });
 
@@ -196,7 +215,10 @@ async function saveArticle() {
     const form = document.getElementById('articleForm');
     let content = typeof tinymce !== 'undefined' ? tinymce.get('article-editor').getContent() : form.querySelector('[name=content]').value;
 
-    // DOMPurify 过滤
+    // DOMPurify 过滤（编辑器侧友好提示，不是安全边界）
+    // 真正的防线在服务端 sanitizeRichHtml()：author 完全可以绕过这里直接打 API。
+    // 保留 style 是为了不丢 TinyMCE 的对齐/颜色等格式——服务端会对 style
+    // 做属性级白名单过滤（url()/expression/position 等一律剔除）。
     if (typeof DOMPurify !== 'undefined') {
         content = DOMPurify.sanitize(content, {
             ALLOWED_TAGS: ['p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 's', 'a', 'img', 'blockquote', 'ul', 'ol', 'li', 'pre', 'code', 'hr', 'div', 'span', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption'],
@@ -247,7 +269,7 @@ async function publishArticle() {
     saveArticle();
 }
 
-// 状态选择交互 — 完全使用内联样式，绕过 CDN Tailwind 动态类问题
+// 状态选择交互 — 用内联样式而非动态拼 class，避免构建期扫描不到的工具类
 const statusStyles = {
     draft: { bg: '#F5F2F0', border: '#8E827F' },
     published: { bg: '#87A878', border: '#87A878' },

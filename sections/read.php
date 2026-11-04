@@ -393,14 +393,18 @@ $initial = mb_substr($author, 0, 1);
 
     <!-- 正文 -->
     <div class="read-content">
-        <?= $article['content'] ?>
+        <?php
+        // 入库时已净化；这里再兜一层，保证修复前存下的历史文章也不会带 payload 渲染。
+        // sanitizeRichHtml 是幂等的，对已净化内容不会产生二次改动。
+        echo sanitizeRichHtml((string)$article['content']);
+        ?>
     </div>
 </article>
 
 <!-- 桌面端：固定侧边悬浮导航 -->
 <nav class="read-nav-desktop" aria-label="前后文章导航">
     <?php if ($prevArticle): ?>
-        <a href="/read?id=<?= (int)$prevArticle['id'] ?>" class="read-nav-btn read-nav-btn--prev">
+        <a href="/read/<?= (int)$prevArticle['id'] ?>" class="read-nav-btn read-nav-btn--prev">
             <span class="read-nav-btn__arrow">←</span>
             <span class="read-nav-btn__title"><?= htmlspecialchars($prevArticle['title']) ?></span>
         </a>
@@ -409,7 +413,7 @@ $initial = mb_substr($author, 0, 1);
     <?php endif; ?>
 
     <?php if ($nextArticle): ?>
-        <a href="/read?id=<?= (int)$nextArticle['id'] ?>" class="read-nav-btn read-nav-btn--next">
+        <a href="/read/<?= (int)$nextArticle['id'] ?>" class="read-nav-btn read-nav-btn--next">
             <span class="read-nav-btn__arrow">→</span>
             <span class="read-nav-btn__title"><?= htmlspecialchars($nextArticle['title']) ?></span>
         </a>
@@ -422,14 +426,14 @@ $initial = mb_substr($author, 0, 1);
 <nav class="read-nav-mobile" aria-label="前后文章导航">
     <div class="read-nav-mobile__inner">
         <?php if ($prevArticle): ?>
-            <a href="/read?id=<?= (int)$prevArticle['id'] ?>">
+            <a href="/read/<?= (int)$prevArticle['id'] ?>">
                 <span class="read-nav-mobile__label">← 上一篇</span>
                 <span class="read-nav-mobile__title"><?= htmlspecialchars($prevArticle['title']) ?></span>
             </a>
         <?php endif; ?>
 
         <?php if ($nextArticle): ?>
-            <a href="/read?id=<?= (int)$nextArticle['id'] ?>">
+            <a href="/read/<?= (int)$nextArticle['id'] ?>">
                 <span class="read-nav-mobile__label">下一篇 →</span>
                 <span class="read-nav-mobile__title"><?= htmlspecialchars($nextArticle['title']) ?></span>
             </a>

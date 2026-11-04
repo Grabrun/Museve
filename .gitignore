@@ -26,3 +26,7 @@ backups/
 # 环境
 .env
 .openclaw/
+
+# 前端构建产物与本地工具链
+node_modules/
+tools/php/

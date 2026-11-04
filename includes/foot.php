@@ -34,7 +34,7 @@ $customFooter = $settings['custom_footer'] ?? '';
 <!-- 移动端底部导航占位 (防止内容被遮挡) -->
 <div class="md:hidden h-16"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script>
-<script src="/resources/js/main.js"></script>
+<script src="<?= htmlspecialchars(assetUrl('/resources/vendor/pjax/pjax.min.js')) ?>"></script>
+<script src="<?= htmlspecialchars(assetUrl('/resources/js/main.js')) ?>"></script>
 </body>
 </html>

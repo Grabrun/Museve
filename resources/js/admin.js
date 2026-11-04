@@ -90,7 +90,10 @@ async function deleteItem(type, id) {
  * ========================================== */
 async function logout() {
     try {
-        await fetch('/admin/api/auth/logout', { method: 'POST' });
+        await fetch('/admin/api/auth/logout', {
+            method: 'POST',
+            headers: csrfHeaders()
+        });
     } catch (e) {}
     window.location.href = '/admin/login';
 }
@@ -105,22 +108,28 @@ document.addEventListener('pjax:complete', () => {
 /* ==========================================
  * 6. 全局 401 拦截 — 登录过期自动跳转
  * ========================================== */
-(function patchFetch() {
-    const originalFetch = window.fetch;
-    window.fetch = function(...args) {
-        return originalFetch.apply(this, args).then(async (res) => {
-            if (res.status === 401 && res.headers.get('content-type')?.includes('json')) {
-                const clone = res.clone();
-                const body = await clone.json();
-                if (body.code === 401) {
-                    window.location.href = '/admin/login';
-                    return Promise.reject(new Error('unauthorized'));
+// article-edit.php 为了脚本顺序会先手动引入一次 admin.js，页脚还会再引入一次。
+// 这里加幂等守卫，避免 window.fetch 被套两层。
+if (!window.__museveFetchPatched) {
+    window.__museveFetchPatched = true;
+
+    (function patchFetch() {
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            return originalFetch.apply(this, args).then(async (res) => {
+                if (res.status === 401 && res.headers.get('content-type')?.includes('json')) {
+                    const clone = res.clone();
+                    const body = await clone.json();
+                    if (body.code === 401) {
+                        window.location.href = '/admin/login';
+                        return Promise.reject(new Error('unauthorized'));
+                    }
                 }
-            }
-            return res;
-        });
-    };
-})();
+                return res;
+            });
+        };
+    })();
+}
 
 /* ==========================================
  * 7. 键盘快捷键

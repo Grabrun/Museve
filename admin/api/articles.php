@@ -72,9 +72,9 @@ switch ($method) {
         $title = trim($body['title'] ?? '');
         if (empty($title)) jsonResponse(400, '标题不能为空');
 
-        $content = $body['content'] ?? '';
-        $allowedTags = '<p><br><h1><h2><h3><h4><h5><h6><strong><em><u><s><a><img><blockquote><ul><ol><li><pre><code><hr><div><span><table><thead><tbody><tr><th><td><figure><figcaption>';
-        $content = strip_tags($content, $allowedTags);
+        // 服务端白名单净化：剥事件属性、限协议、过滤 style。
+        // 前端 DOMPurify 只是编辑器侧的辅助，不是安全边界（author 可直连 API）。
+        $content = sanitizeRichHtml($body['content'] ?? '');
 
         // author 只能创建草稿
         $status = $body['status'] ?? 'draft';
@@ -102,9 +102,9 @@ switch ($method) {
         $title = trim($body['title'] ?? '');
         if (empty($title)) jsonResponse(400, '标题不能为空');
 
-        $content = $body['content'] ?? '';
-        $allowedTags = '<p><br><h1><h2><h3><h4><h5><h6><strong><em><u><s><a><img><blockquote><ul><ol><li><pre><code><hr><div><span><table><thead><tbody><tr><th><td><figure><figcaption>';
-        $content = strip_tags($content, $allowedTags);
+        // 服务端白名单净化：剥事件属性、限协议、过滤 style。
+        // 前端 DOMPurify 只是编辑器侧的辅助，不是安全边界（author 可直连 API）。
+        $content = sanitizeRichHtml($body['content'] ?? '');
 
         $fields = ['title = :title', 'content = :content', 'updated_at = NOW()'];
         $params = [':title' => $title, ':content' => $content];

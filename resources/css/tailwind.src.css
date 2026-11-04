@@ -1,0 +1,4 @@
+/* Tailwind 源码入口 —— 构建产物为 resources/css/tailwind.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -27,6 +27,9 @@ if ($method === 'GET') {
 
             if (!$article) jsonResponse(3001, '文章不存在');
 
+            // 输出侧兜底净化：覆盖本次修复之前就已入库的文章
+            $article['content'] = sanitizeRichHtml((string)$article['content']);
+
             // 字数和阅读时间
             $article['word_count'] = mb_strlen(strip_tags($article['content']));
             $article['read_time'] = max(1, ceil($article['word_count'] / 300));
@@ -50,9 +53,8 @@ if ($method === 'GET') {
         $total = (int)$countStmt->fetchColumn();
 
         $stmt = $db->prepare("
-            SELECT a.id, a.title, a.cover, a.created_at,
-                   u.username AS author_name, u.avatar AS author_avatar,
-                   CHAR_LENGTH(a.content) AS word_count
+            SELECT a.id, a.title, a.cover, a.created_at, a.content,
+                   u.username AS author_name, u.avatar AS author_avatar
             FROM articles a
             LEFT JOIN users u ON a.author_id = u.id
             WHERE a.status = 'published'
@@ -64,10 +66,15 @@ if ($method === 'GET') {
         $stmt->execute();
         $list = $stmt->fetchAll();
 
-        // 添加阅读时间
+        // 阅读时长统一按"去标签后的真实字数"算，与详情页保持同一口径。
+        // 之前列表用 CHAR_LENGTH(content)，把 HTML 标签也算进字数，普遍虚高。
         foreach ($list as &$item) {
-            $item['read_time'] = max(1, ceil(($item['word_count'] ?? 0) / 300));
+            $plain = strip_tags((string)($item['content'] ?? ''));
+            $item['word_count'] = mb_strlen($plain);
+            $item['read_time']  = max(1, (int)ceil($item['word_count'] / 300));
+            unset($item['content']); // 列表不需要正文，避免把 LONGTEXT 传给前端
         }
+        unset($item);
 
         jsonSuccess(['list' => $list, 'total' => $total, 'page' => $page, 'per' => $per]);
     } catch (PDOException $e) {

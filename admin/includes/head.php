@@ -30,35 +30,11 @@ if ($userRole === 'admin') {
     <link rel="icon" href="/resources/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    'museve-bg': '#F9F7F4',
-                    'museve-haze': '#F5F2F0',
-                    'museve-rose': '#DDB8B8',
-                    'museve-rose-deep': '#B28B8B',
-                    'museve-blue': '#A8C5DA',
-                    'museve-night': '#3E3640',
-                    'museve-gray': '#8E827F',
-                    'museve-green': '#87A878',
-                    'museve-orange': '#E0A96D',
-                    'museve-red': '#D18B8B',
-                    'museve-ash': '#9BADB7',
-                },
-                fontFamily: {
-                    'serif': ['Noto Serif SC', 'serif'],
-                    'sans': ['Inter', 'system-ui', 'sans-serif'],
-                }
-            }
-        }
-    }
-    </script>
-    <link rel="stylesheet" href="/resources/css/admin.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- 图标与样式：全部本地化，不再依赖 unpkg / cdn.tailwindcss.com -->
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/vendor/phosphor/style.css')) ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/css/tailwind.css')) ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/css/admin.css')) ?>">
+    <script defer src="<?= htmlspecialchars(assetUrl('/resources/vendor/alpine/alpine.min.js')) ?>"></script>
 </head>
 <body class="bg-[#F4F2EF] text-museve-night min-h-screen flex font-sans" x-data="{ sidebarCollapsed: false, sidebarOpen: false }">
 
@@ -81,7 +57,7 @@ if ($userRole === 'admin') {
         <?php $isActive = ($currentPath === $path) || ($path !== '/admin' && strpos($currentPath, $path) === 0); ?>
         <a href="<?= $path ?>"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
-                  <?= $isActive ? 'bg-white/15 text-white' : 'text-white/60 hover:bg-white/8 hover:text-white' ?>"
+                  <?= $isActive ? 'bg-white/15 text-white' : 'text-white/60 hover:bg-white/10 hover:text-white' ?>"
            :class="sidebarCollapsed ? 'justify-center' : ''">
             <i class="<?= $item['icon'] ?> text-lg flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" x-transition class="text-sm whitespace-nowrap"><?= $item['label'] ?></span>
@@ -100,19 +76,19 @@ if ($userRole === 'admin') {
     <!-- 底部操作 -->
     <div class="p-3 border-t border-white/10 space-y-1">
         <button @click="sidebarCollapsed = !sidebarCollapsed"
-                class="hidden lg:flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/8 hover:text-white transition-colors text-sm"
+                class="hidden lg:flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm"
                 :class="sidebarCollapsed ? 'justify-center' : ''">
             <i class="ph ph-sidebar text-lg flex-shrink-0" :class="sidebarCollapsed ? 'ph-arrows-out-simple' : 'ph-arrows-in-simple'"></i>
             <span x-show="!sidebarCollapsed" x-transition class="whitespace-nowrap">收起侧栏</span>
         </button>
         <a href="/" target="_blank"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:bg-white/8 hover:text-white transition-colors text-sm"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm"
            :class="sidebarCollapsed ? 'justify-center' : ''">
             <i class="ph ph-arrow-square-out text-lg flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" x-transition class="whitespace-nowrap">查看前台</span>
         </a>
         <button onclick="logout()"
-                class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/8 hover:text-white transition-colors text-sm"
+                class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm"
                 :class="sidebarCollapsed ? 'justify-center' : ''">
             <i class="ph ph-sign-out text-lg flex-shrink-0"></i>
             <span x-show="!sidebarCollapsed" x-transition class="whitespace-nowrap">退出登录</span>

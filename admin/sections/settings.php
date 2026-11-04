@@ -176,7 +176,7 @@ try {
                         <input type="radio" name="maintenance_mode" value="0" <?= ($settings['maintenance_mode'] ?? '0') !== '1' ? 'checked' : '' ?> class="text-[#DDB8B8]">
                         <span class="text-sm text-[#87A878]">关闭</span>
                     </label>
-                    <span class="text-xs text-[#8E827F] ml-2">开启后前台将显示维护提示页面</span>
+                    <span class="text-xs text-[#8E827F] ml-2">开启后前台返回维护页（503），管理员登录后仍可浏览</span>
                 </div>
             </div>
         </div>
@@ -186,9 +186,9 @@ try {
     <div class="bg-white rounded-xl p-6">
         <h2 class="text-lg font-semibold text-[#3E3640] mb-4">页脚设置</h2>
         <div>
-            <label class="text-sm text-[#8E827F]">自定义页脚 HTML</label>
+            <label class="text-sm text-[#8E827F]">自定义页脚内容</label>
             <textarea name="custom_footer" rows="3"
-                      placeholder="页脚额外内容（支持 HTML）"
+                      placeholder="页脚额外内容（纯文本，不支持 HTML）"
                       class="w-full mt-1 px-3 py-2 bg-[#F9F7F4] border border-[#E5E0DB] rounded-lg text-sm focus:outline-none focus:border-[#DDB8B8] setting-input font-mono resize-none"><?= htmlspecialchars($settings['custom_footer'] ?? '') ?></textarea>
         </div>
         <div class="mt-4">
