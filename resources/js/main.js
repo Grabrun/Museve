@@ -276,42 +276,6 @@ function highlightNav() {
 }
 
 /* ==========================================
- * 8. 移动端菜单 (Alpine.js)
- * ========================================== */
-document.addEventListener('alpine:init', () => {
-  Alpine.data('mobileMenu', () => ({
-    open: false,
-    toggle() {
-      this.open = !this.open;
-    },
-    close() {
-      this.open = false;
-    },
-  }));
-});
-
-/* ==========================================
- * 9. 退出登录
- * ========================================== */
-function logout(e) {
-  if (e) e.preventDefault();
-
-  fetch('/admin/api/auth/logout', {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json' },
-  })
-    .then((res) => {
-      if (res.ok) {
-        window.location.href = '/';
-      }
-    })
-    .catch((err) => {
-      console.error('退出失败:', err);
-    });
-}
-
-/* ==========================================
  * 初始化
  * ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
