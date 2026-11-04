@@ -15,7 +15,29 @@
 // 1. 配置加载
 // ============================================================
 
-$config = require __DIR__ . '/config.php';
+$configFile = __DIR__ . '/config.php';
+
+/**
+ * 首次部署守卫
+ *
+ * config.php 不在版本库内（内含数据库口令），所以刚解压的部署包一定缺它。
+ * 若直接 require 会抛致命错误，异常处理器还没注册，PHP 默认把绝对路径
+ * 和堆栈回显给访客。这里改成先给一句人话提示，再以 503 退出。
+ */
+if (!is_file($configFile)) {
+    ini_set('display_errors', '0');
+    http_response_code(503);
+    header('Content-Type: text/plain; charset=utf-8');
+    header('Retry-After: 300');
+    echo "Museve 尚未完成部署：缺少 includes/config.php\n\n";
+    echo "请执行：\n";
+    echo "  cp includes/config.example.php includes/config.php\n\n";
+    echo "然后填写其中的数据库连接信息（主机 / 库名 / 账号 / 口令），\n";
+    echo "并确认 uploads/ 目录对 PHP 进程可写。\n";
+    exit;
+}
+
+$config = require $configFile;
 
 /**
  * 调试开关（config.php 未声明时视为关闭）

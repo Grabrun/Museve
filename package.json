@@ -9,6 +9,7 @@
     "build": "npm run build:css && npm run build:vendor",
     "lint:php": "node tools/lint-php.mjs",
     "check:classes": "node tools/check-classes.mjs",
+    "pack": "node tools/pack.mjs",
     "verify": "npm run build && npm run check:classes && npm run lint:php"
   },
   "devDependencies": {

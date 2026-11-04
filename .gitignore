@@ -30,3 +30,6 @@ backups/
 # 前端构建产物与本地工具链
 node_modules/
 tools/php/
+
+# 部署包输出
+dist/

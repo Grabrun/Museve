@@ -213,7 +213,7 @@ $bubbleColors = [
 
         function appendWhisper(w, idx) {
             var color = BUBBLE_COLORS[idx % BUBBLE_COLORS.length];
-            var avatar = escapeHtml(w.avatar || '/resources/images/default-avatar.svg');
+            var avatar = escapeHtml(w.avatar || '/resources/images/default-avatar.png');
             var username = escapeHtml(w.signature || w.username || '匿名');
             var content = escapeHtml(w.content || '').replace(/\n/g, '<br>');
             var time = escapeHtml(w.created_at || '');
@@ -221,7 +221,7 @@ $bubbleColors = [
             var div = document.createElement('div');
             div.className = 'whisper-item flex gap-3';
             div.innerHTML =
-                '<img src="' + avatar + '" alt="头像" class="whisper-avatar" onerror="this.src=\'/resources/images/default-avatar.svg\'">' +
+                '<img src="' + avatar + '" alt="头像" class="whisper-avatar" onerror="this.src=\'/resources/images/default-avatar.png\'">' +
                 '<div class="flex-1 min-w-0">' +
                     '<div class="whisper-bubble" style="background:' + color.bg + ';border-color:' + color.border + '">' +
                         '<p class="whisper-name">' + username + '</p>' +
