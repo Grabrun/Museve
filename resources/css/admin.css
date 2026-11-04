@@ -1,11 +1,39 @@
 /* ===== 暮想 Museve — 后台管理样式 ===== */
 
-/* ---------- 基础 ---------- */
-[x-cloak] { display: none !important; }
-
-/* ---------- 侧边栏过渡 ---------- */
+/* ---------- 侧边栏 ----------
+ * 状态由 <body> 上的两个类驱动，纯 CSS 实现，不依赖任何前端框架：
+ *   body.sidebar-collapsed  桌面端折叠（260px → 72px）
+ *   body.sidebar-open       移动端抽屉展开
+ *
+ * 背景：这里原来用 Alpine.js 的 :class / :style 控制，但 Alpine 的表达式
+ * 求值依赖 new Function()，会被 CSP（script-src 不含 'unsafe-eval'）拦掉，
+ * 结果是侧栏没有宽度、主内容没有左边距，整体糊在一起。改为 CSS 状态类后
+ * 既不牺牲 CSP，也省掉一份 44KB 的运行时。
+ */
 .admin-sidebar {
+    width: 260px;
     transition: width 0.3s ease, transform 0.3s ease;
+}
+body.sidebar-collapsed .admin-sidebar {
+    width: 72px;
+}
+
+/* 折叠态：隐藏文字、图标居中、悬停显示名称 */
+body.sidebar-collapsed .sidebar-label { display: none; }
+body.sidebar-collapsed .admin-nav-item { justify-content: center; }
+.sidebar-tooltip { display: none; }
+body.sidebar-collapsed .sidebar-tooltip { display: block; }
+
+/* 主内容区跟随侧栏宽度偏移（仅桌面端） */
+@media (min-width: 1024px) {
+    body.sidebar-collapsed #adminMain { margin-left: 72px; }
+}
+
+/* 移动端抽屉：默认移出屏幕，body.sidebar-open 时滑入 */
+#sidebarOverlay { display: none; }
+@media (max-width: 1023px) {
+    body.sidebar-open .admin-sidebar { transform: translateX(0); }
+    body.sidebar-open #sidebarOverlay { display: block; }
 }
 
 /* ---------- 表格美化 ---------- */

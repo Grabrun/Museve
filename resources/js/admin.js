@@ -132,7 +132,40 @@ if (!window.__museveFetchPatched) {
 }
 
 /* ==========================================
- * 7. 键盘快捷键
+ * 7. 侧边栏状态
+ * ------------------------------------------
+ * 状态全部落在 <body> 的类上，样式由 admin.css 接管。
+ * 这样不依赖 eval，CSP 可以保持在不含 'unsafe-eval' 的严格档位。
+ * ========================================== */
+const SIDEBAR_KEY = 'museve:sidebar-collapsed';
+
+function toggleSidebarCollapse() {
+    const collapsed = document.body.classList.toggle('sidebar-collapsed');
+    try {
+        localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
+    } catch (e) { /* 隐私模式下不可写，忽略 */ }
+}
+
+function toggleSidebarDrawer() {
+    document.body.classList.toggle('sidebar-open');
+}
+
+function closeSidebarDrawer() {
+    document.body.classList.remove('sidebar-open');
+}
+
+// 移动端点击导航后收起抽屉；点遮罩或按 ESC 同样收起
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('#adminSidebar a');
+    if (link && window.innerWidth < 1024) closeSidebarDrawer();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebarDrawer();
+});
+
+/* ==========================================
+ * 8. 键盘快捷键
  * ========================================== */
 document.addEventListener('keydown', (e) => {
     // ESC 关闭模态框

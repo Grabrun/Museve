@@ -34,18 +34,26 @@ if ($userRole === 'admin') {
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/vendor/phosphor/style.css')) ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/css/tailwind.css')) ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('/resources/css/admin.css')) ?>">
-    <script defer src="<?= htmlspecialchars(assetUrl('/resources/vendor/alpine/alpine.min.js')) ?>"></script>
 </head>
-<body class="bg-[#F4F2EF] text-museve-night min-h-screen flex font-sans" x-data="{ sidebarCollapsed: false, sidebarOpen: false }">
+<body class="bg-[#F4F2EF] text-museve-night min-h-screen flex font-sans">
+
+<script>
+    // 在首次绘制前恢复侧栏折叠状态，避免每次翻页都"先展开再收起"地闪一下。
+    // 写在这里而不是外部文件，是为了赶在 body 渲染前执行。
+    try {
+        if (localStorage.getItem('museve:sidebar-collapsed') === '1') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+    } catch (e) { /* 隐私模式下 localStorage 可能不可用，忽略 */ }
+</script>
 
 <!-- 侧边栏 -->
-<aside class="admin-sidebar fixed inset-y-0 left-0 z-30 bg-museve-night text-white transform transition-all duration-300 lg:translate-x-0 flex flex-col"
-       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-       :style="sidebarCollapsed ? 'width: 72px' : 'width: 260px'">
+<aside id="adminSidebar"
+       class="admin-sidebar fixed inset-y-0 left-0 z-30 bg-museve-night text-white transform -translate-x-full transition-all duration-300 lg:translate-x-0 flex flex-col">
     <!-- Logo -->
     <div class="p-5 border-b border-white/10 flex items-center gap-3 overflow-hidden">
         <img src="/resources/images/logo.svg" alt="Logo" class="h-8 w-8 flex-shrink-0">
-        <div x-show="!sidebarCollapsed" x-transition class="whitespace-nowrap">
+        <div class="sidebar-label whitespace-nowrap">
             <h1 class="text-lg font-serif font-semibold tracking-wider">暮想</h1>
             <p class="text-[10px] text-white/40">后花园 · 管理后台</p>
         </div>
@@ -56,17 +64,15 @@ if ($userRole === 'admin') {
         <?php foreach ($menuItems as $path => $item): ?>
         <?php $isActive = ($currentPath === $path) || ($path !== '/admin' && strpos($currentPath, $path) === 0); ?>
         <a href="<?= $path ?>"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
-                  <?= $isActive ? 'bg-white/15 text-white' : 'text-white/60 hover:bg-white/10 hover:text-white' ?>"
-           :class="sidebarCollapsed ? 'justify-center' : ''">
+           class="admin-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
+                  <?= $isActive ? 'bg-white/15 text-white' : 'text-white/60 hover:bg-white/10 hover:text-white' ?>">
             <i class="<?= $item['icon'] ?> text-lg flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" x-transition class="text-sm whitespace-nowrap"><?= $item['label'] ?></span>
+            <span class="sidebar-label text-sm whitespace-nowrap"><?= $item['label'] ?></span>
             <?php if ($isActive): ?>
             <div class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-museve-rose rounded-r-full"></div>
             <?php endif; ?>
             <!-- 折叠态 tooltip -->
-            <div x-show="sidebarCollapsed"
-                 class="absolute left-full ml-2 px-2 py-1 bg-museve-night text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+            <div class="sidebar-tooltip absolute left-full ml-2 px-2 py-1 bg-museve-night text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
                 <?= $item['label'] ?>
             </div>
         </a>
@@ -75,36 +81,33 @@ if ($userRole === 'admin') {
 
     <!-- 底部操作 -->
     <div class="p-3 border-t border-white/10 space-y-1">
-        <button @click="sidebarCollapsed = !sidebarCollapsed"
-                class="hidden lg:flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm"
-                :class="sidebarCollapsed ? 'justify-center' : ''">
-            <i class="ph ph-sidebar text-lg flex-shrink-0" :class="sidebarCollapsed ? 'ph-arrows-out-simple' : 'ph-arrows-in-simple'"></i>
-            <span x-show="!sidebarCollapsed" x-transition class="whitespace-nowrap">收起侧栏</span>
+        <button type="button" onclick="toggleSidebarCollapse()"
+                class="admin-nav-item hidden lg:flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm">
+            <i class="ph ph-sidebar text-lg flex-shrink-0"></i>
+            <span class="sidebar-label whitespace-nowrap">收起侧栏</span>
         </button>
         <a href="/" target="_blank"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm"
-           :class="sidebarCollapsed ? 'justify-center' : ''">
+           class="admin-nav-item flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm">
             <i class="ph ph-arrow-square-out text-lg flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" x-transition class="whitespace-nowrap">查看前台</span>
+            <span class="sidebar-label whitespace-nowrap">查看前台</span>
         </a>
-        <button onclick="logout()"
-                class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm"
-                :class="sidebarCollapsed ? 'justify-center' : ''">
+        <button type="button" onclick="logout()"
+                class="admin-nav-item flex items-center gap-3 w-full px-3 py-2 rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition-colors text-sm">
             <i class="ph ph-sign-out text-lg flex-shrink-0"></i>
-            <span x-show="!sidebarCollapsed" x-transition class="whitespace-nowrap">退出登录</span>
+            <span class="sidebar-label whitespace-nowrap">退出登录</span>
         </button>
     </div>
 </aside>
 
 <!-- 移动端遮罩 -->
-<div class="fixed inset-0 bg-black/50 z-20 lg:hidden" x-show="sidebarOpen" @click="sidebarOpen = false" x-cloak></div>
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-20 lg:hidden" onclick="closeSidebarDrawer()"></div>
 
 <!-- 主内容区 -->
-<div class="flex-1 transition-all duration-300" :class="sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[260px]'">
+<div id="adminMain" class="flex-1 transition-all duration-300 lg:ml-[260px]">
     <!-- 顶部栏 -->
     <header class="sticky top-0 z-10 bg-white/70 backdrop-blur-xl border-b border-[#E5E0DB]/50 h-[56px] flex items-center justify-between px-6">
         <div class="flex items-center gap-3">
-            <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-museve-night p-1">
+            <button type="button" onclick="toggleSidebarDrawer()" class="lg:hidden text-museve-night p-1">
                 <i class="ph ph-list text-xl"></i>
             </button>
             <div class="text-sm text-museve-gray">欢迎回来，<?= htmlspecialchars($_SESSION['username'] ?? $_SESSION['admin_account'] ?? '管理员') ?></div>

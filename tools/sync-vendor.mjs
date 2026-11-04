@@ -18,7 +18,6 @@ const OUT = path.join(ROOT, 'resources', 'vendor');
 
 /** @type {{from:string, to:string}[]} 单文件拷贝 */
 const FILES = [
-  { from: 'alpinejs/dist/cdn.min.js', to: 'alpine/alpine.min.js' },
   { from: 'pjax/pjax.min.js', to: 'pjax/pjax.min.js' },
   { from: 'dompurify/dist/purify.min.js', to: 'dompurify/purify.min.js' },
   { from: '@phosphor-icons/web/src/regular/style.css', to: 'phosphor/style.css' },
