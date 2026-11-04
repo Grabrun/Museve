@@ -1,0 +1,28 @@
+# ============================================================
+# 统一换行符：仓库内一律 LF
+# ------------------------------------------------------------
+# 本项目部署目标是 Linux。Windows 检出时若脚本变成 CRLF，
+# 到服务器上会报 `bash: $'\r': command not found` 或
+# `/usr/bin/env: 'bash\r': No such file or directory`。
+# 这里显式钉死，避免依赖各机器的 core.autocrlf 设置。
+# ============================================================
+
+* text=auto eol=lf
+
+# ---------- 二进制 ----------
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.zip   binary
+
+# ---------- GitHub 语言统计与 diff 展示 ----------
+# 第三方库与构建产物不计入语言占比，diff 里默认折叠
+resources/vendor/**     linguist-vendored
+resources/css/tailwind.css linguist-generated
+package-lock.json       linguist-generated

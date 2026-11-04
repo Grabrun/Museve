@@ -31,14 +31,16 @@
 
 - 后端: PHP 8.1+
 - 数据库: MySQL 8.0+ (InnoDB, utf8mb4)
-- 前端: HTML5/CSS3/JS ES6+, Tailwind CSS (构建期预编译), Alpine.js
-- Pjax: pjax.min.js 无刷新加载
-- 动效: Motion One
-- 编辑器: TinyMCE
-- 安全: bcrypt/PDO/CSRF Token/DOMPurify
+- 前端: HTML5/CSS3/JS ES6+，Tailwind CSS（构建期预编译，非浏览器内 JIT）
+- 交互: 原生 JS + Pjax（`pjax.min.js`）无刷新加载；Alpine.js 仅用于后台侧边栏
+- 动效: IntersectionObserver + CSS `@keyframes`（无第三方动画库）
+- 编辑器: TinyMCE 6（仅后台）
+- 图标: Phosphor Icons（本地字体图标）
+- 安全: bcrypt / PDO 预处理 / CSRF Token / 服务端 DOMDocument 白名单净化
+- 响应式: 移动端底部固定导航（≤768px），桌面端顶部导航；前台不设汉堡菜单
 
 ---
 
-版本：V5.2 · 暮想 Museve 标准化重构版
+版本：V5.3 · 暮想 Museve 标准化重构版
 设计理念：薄暮玫瑰色的时光容器，每一个像素都在轻声说：你的回忆，值得被温柔珍藏。
-最后更新：2026-06-10
+最后更新：2026-11-05
