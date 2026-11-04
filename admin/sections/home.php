@@ -79,7 +79,7 @@ $diskPercent = min(100, round($diskUsed / $diskLimit * 100));
     <div class="bg-white rounded-xl p-5 border-l-4 hover:shadow-md transition-shadow" style="border-color: <?= $card['color'] ?>">
         <div class="flex items-center justify-between mb-3">
             <span class="text-sm text-[#8E827F]"><?= $card['label'] ?></span>
-            <i class="<?= $card['icon'] ?> text-lg" style="color: <?= $card['color'] ?>"></i>
+            <i class="ph <?= $card['icon'] ?> text-lg" style="color: <?= $card['color'] ?>"></i>
         </div>
         <div class="text-3xl font-bold text-[#3E3640]"><?= $card['count'] ?></div>
         <?php if ($card['week'] > 0): ?>

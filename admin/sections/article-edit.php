@@ -59,7 +59,7 @@ $pageTitle = $isEdit ? '编辑文章' : '新增文章';
                     <label class="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors <?= $currentStatus === $val ? 'bg-'.$s['color'].'/10 border border-'.$s['color'].'/30' : 'hover:bg-museve-haze border border-transparent' ?>">
                         <input type="radio" name="status" value="<?= $val ?>" <?= $currentStatus === $val ? 'checked' : '' ?>
                                class="sr-only">
-                        <i class="<?= $s['icon'] ?> text-lg <?= $currentStatus === $val ? 'text-'.$s['color'] : 'text-museve-gray' ?>"></i>
+                        <i class="ph <?= $s['icon'] ?> text-lg <?= $currentStatus === $val ? 'text-'.$s['color'] : 'text-museve-gray' ?>"></i>
                         <span class="text-sm <?= $currentStatus === $val ? 'font-medium text-'.$s['color'] : 'text-museve-gray' ?>"><?= $s['label'] ?></span>
                         <?php if ($currentStatus === $val): ?>
                         <i class="ph ph-check text-sm ml-auto text-<?= $s['color'] ?>"></i>

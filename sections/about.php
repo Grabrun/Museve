@@ -97,7 +97,7 @@ $settings = getSettings();
                 ['PHP 8.1+', '后端语言', 'ph-file-code', '#DDB8B8'],
                 ['MySQL 8.0+', '数据库', 'ph-database', '#A8C5DA'],
                 ['Tailwind CSS', '前端样式', 'ph-paint-brush', '#DDB8B8'],
-                ['Alpine.js', '前端交互', 'ph-lightning', '#A8C5DA'],
+                ['原生 JS', '前端交互', 'ph-lightning', '#A8C5DA'],
                 ['TinyMCE', '文章编辑器', 'ph-text-aa', '#DDB8B8'],
                 ['Phosphor Icons', '图标库', 'ph-asterisk', '#A8C5DA'],
                 ['PDO + bcrypt', '安全与数据库', 'ph-shield-check', '#DDB8B8'],

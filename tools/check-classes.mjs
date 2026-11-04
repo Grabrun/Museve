@@ -142,13 +142,51 @@ for (const file of FILES) {
   }
 }
 
-if (missing.size === 0) {
-  console.log(`✓ 类名覆盖检查通过（比对 ${checked} 次引用，无缺失）`);
+/* ------------------------------------------------------------------ *
+ * 附加检查：Phosphor 图标必须同时带 `ph` 基础类
+ * ------------------------------------------------------------------ *
+ * `.ph` 负责 font-family，`.ph-xxx:before` 只负责字形。只写 `ph-xxx` 时，
+ * 私有区码位会用继承字体渲染，结果是空白或豆腐块——不报错、不看页面根本
+ * 发现不了（后台侧栏的菜单图标就这样空了很久）。
+ *
+ * 类名可能是 PHP 拼出来的（class="<?= $item['icon'] ?>"），所以两种情况都查：
+ * 出现 `ph-` 字面量，或者类名里含 PHP 输出，都要求存在独立的 `ph` 记号。
+ */
+const ICON_MISSING = [];
+
+for (const file of FILES) {
+  if (!file.endsWith('.php')) continue;
+  const src = fs.readFileSync(file, 'utf8');
+  const tagRe = /<i\b[^>]*?class="([^"]*)"[^>]*>/g;
+  let m;
+  while ((m = tagRe.exec(src))) {
+    const cls = m[1];
+    const looksLikeIcon = /\bph-[a-z0-9-]+\b/.test(cls) || cls.includes('<?=');
+    if (!looksLikeIcon) continue;
+
+    // 类名里可能出现 <?= ... ?>，按空白切词后检查是否有独立的 ph
+    const tokens = cls.replace(/<\?=[^?]*\?>/g, ' __PHP__ ').split(/\s+/).filter(Boolean);
+    if (!tokens.includes('ph')) {
+      const line = src.slice(0, m.index).split('\n').length;
+      ICON_MISSING.push(`${path.relative(ROOT, file).replace(/\\/g, '/')}:${line}`);
+    }
+  }
+}
+
+if (ICON_MISSING.length) {
+  console.error(`✗ ${ICON_MISSING.length} 处图标缺少 ph 基础类（会渲染成空白或豆腐块）：`);
+  for (const loc of ICON_MISSING) console.error(`  - ${loc}`);
+}
+
+if (missing.size === 0 && ICON_MISSING.length === 0) {
+  console.log(`✓ 类名覆盖检查通过（比对 ${checked} 次引用，无缺失；图标基础类齐全）`);
   process.exit(0);
 }
 
-console.error(`✗ ${missing.size} 个 Tailwind 类未出现在构建产物中：`);
-for (const [token, files] of [...missing.entries()].sort()) {
-  console.error(`  - ${token}    (${[...files].slice(0, 3).join(', ')})`);
+if (missing.size > 0) {
+  console.error(`✗ ${missing.size} 个 Tailwind 类未出现在构建产物中：`);
+  for (const [token, files] of [...missing.entries()].sort()) {
+    console.error(`  - ${token}    (${[...files].slice(0, 3).join(', ')})`);
+  }
 }
 process.exit(1);

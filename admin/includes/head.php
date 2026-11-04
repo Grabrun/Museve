@@ -66,7 +66,7 @@ if ($userRole === 'admin') {
         <a href="<?= $path ?>"
            class="admin-nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
                   <?= $isActive ? 'bg-white/15 text-white' : 'text-white/60 hover:bg-white/10 hover:text-white' ?>">
-            <i class="<?= $item['icon'] ?> text-lg flex-shrink-0"></i>
+            <i class="ph <?= $item['icon'] ?> text-lg flex-shrink-0"></i>
             <span class="sidebar-label text-sm whitespace-nowrap"><?= $item['label'] ?></span>
             <?php if ($isActive): ?>
             <div class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-museve-rose rounded-r-full"></div>
